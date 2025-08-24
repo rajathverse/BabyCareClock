@@ -1,0 +1,3262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Milu Care Clock">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#9333ea">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/jpeg" href="icons/app-icon.jpg">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="icons/app-icon.jpg">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/app-icon.jpg">
+    <title>Milu Care Clock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Design C: Gentle Tech - Purple + Green Palette */
+            --primary-50: #faf5ff;
+            --primary-100: #f3e8ff;
+            --primary-200: #e9d5ff;
+            --primary-300: #d8b4fe;
+            --primary-400: #c084fc;
+            --primary-500: #a855f7;
+            --primary-600: #9333ea;
+            --primary-700: #7c3aed;
+            --primary-800: #6b21a8;
+            --primary-900: #581c87;
+            --primary-600-rgb: 147, 51, 234;
+            
+            --accent-50: #f0fdf4;
+            --accent-100: #dcfce7;
+            --accent-200: #bbf7d0;
+            --accent-300: #86efac;
+            --accent-400: #4ade80;
+            --accent-500: #22c55e;
+            --accent-600: #16a34a;
+            --accent-700: #15803d;
+            --accent-800: #166534;
+            --accent-900: #14532d;
+            
+            --success-50: #ecfdf5;
+            --success-100: #d1fae5;
+            --success-200: #a7f3d0;
+            --success-500: #10b981;
+            --success-600: #059669;
+            
+            --warning-50: #fefce8;
+            --warning-100: #fef9c3;
+            --warning-500: #eab308;
+            --warning-600: #ca8a04;
+            
+            --error-50: #fef2f2;
+            --error-100: #fee2e2;
+            --error-500: #ef4444;
+            --error-600: #dc2626;
+            
+            /* Soft Tech Grays */
+            --gray-50: #fafafa;
+            --gray-100: #f4f4f5;
+            --gray-200: #e4e4e7;
+            --gray-300: #d4d4d8;
+            --gray-400: #a1a1aa;
+            --gray-500: #71717a;
+            --gray-600: #52525b;
+            --gray-700: #3f3f46;
+            --gray-800: #27272a;
+            --gray-900: #18181b;
+            
+            /* Gentle Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(147, 51, 234, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(147, 51, 234, 0.1), 0 2px 4px -1px rgba(147, 51, 234, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(147, 51, 234, 0.1), 0 4px 6px -2px rgba(147, 51, 234, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(147, 51, 234, 0.1), 0 10px 10px -5px rgba(147, 51, 234, 0.04);
+            
+            /* Typography Scale */
+            --font-primary: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-secondary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            
+            /* Enhanced Spacing Scale */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            
+            /* Border Radius Scale */
+            --radius-sm: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.25rem;
+            --radius-2xl: 1.75rem;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Allow text selection for input fields */
+        input, textarea, select {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        
+        body {
+            font-family: var(--font-secondary);
+            background: linear-gradient(135deg, 
+                #faf5ff 0%, 
+                #f3e8ff 25%, 
+                #f0fdf4 75%, 
+                #dcfce7 100%);
+            min-height: 100vh;
+            padding: var(--space-3);
+            color: var(--gray-800);
+            font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+            line-height: 1.6;
+            /* iOS scroll optimization */
+            -webkit-overflow-scrolling: touch;
+            /* Prevent zoom on input focus */
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        .app-container {
+            max-width: 428px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            min-height: calc(100vh - 1.5rem);
+            position: relative;
+            border: 1px solid rgba(147, 51, 234, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+            color: white;
+            padding: var(--space-8) var(--space-6) var(--space-6);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 40%),
+                radial-gradient(circle at 70% 80%, rgba(34, 197, 94, 0.2) 0%, transparent 40%),
+                radial-gradient(circle at 90% 10%, rgba(255,255,255,0.1) 0%, transparent 30%);
+            pointer-events: none;
+        }
+        
+        .brand {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+        
+        .brand-name {
+            font-family: var(--font-primary);
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0;
+            margin-top: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .brand-credit {
+            font-family: var(--font-secondary);
+            font-size: 0.6875rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            opacity: 0.7;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: lowercase;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .brand-tagline {
+            font-size: 14px;
+            opacity: 0.85;
+            font-weight: 400;
+            margin-bottom: 12px;
+        }
+        
+        .time-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            padding: var(--space-3) var(--space-5);
+            border-radius: var(--radius-xl);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .form-section {
+            padding: var(--space-8) var(--space-6);
+            background: linear-gradient(to bottom, 
+                rgba(250, 245, 255, 0.4) 0%, 
+                rgba(255, 255, 255, 0.85) 100%);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .form-grid {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .form-row .input-group {
+            margin: 0;
+        }
+        
+        @media (max-width: 480px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-label {
+            display: block;
+            font-family: var(--font-primary);
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: var(--space-3);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: var(--space-5);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            font-size: 1rem;
+            font-family: var(--font-secondary);
+            background: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--gray-800);
+            font-weight: 500;
+        }
+        
+        .form-input[type="time"] {
+            /* Force 12-hour format in supported browsers */
+            position: relative;
+        }
+        
+        .form-input[type="time"]::-webkit-calendar-picker-indicator {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M10 6v4l3 3m5-3a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z'/%3e%3c/svg%3e");
+            background-size: 16px;
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Force 12-hour time input format */
+        .form-input[type="time"]::-webkit-datetime-edit {
+            color: var(--gray-900);
+        }
+        
+        .form-input[type="time"]::-webkit-datetime-edit-ampm-field {
+            color: var(--primary-600);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        /* Force browsers to show AM/PM */
+        .form-input[type="time"] {
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+            appearance: none;
+        }
+        
+        .form-input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+            display: flex;
+        }
+        
+        .form-input[type="time"]::-webkit-datetime-edit-hour-field,
+        .form-input[type="time"]::-webkit-datetime-edit-minute-field,
+        .form-input[type="time"]::-webkit-datetime-edit-ampm-field {
+            padding: 2px;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+        
+        .quick-templates {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .template-btn {
+            padding: 8px 12px;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            background: white;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+        
+        .template-btn:hover {
+            border-color: var(--primary-300);
+            background: var(--primary-50);
+        }
+        
+        .template-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .primary-button {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-600) 100%);
+            color: white;
+            border: none;
+            padding: var(--space-5) var(--space-6);
+            border-radius: var(--radius-xl);
+            font-family: var(--font-primary);
+            font-size: 1.0625rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
+            margin-top: var(--space-4);
+            letter-spacing: -0.025em;
+        }
+        
+        .primary-button:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, var(--accent-600) 0%, var(--accent-700) 100%);
+        }
+        
+        .primary-button:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .secondary-button {
+            width: 100%;
+            padding: 10px 20px;
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .secondary-button:hover {
+            background: var(--gray-200);
+            border-color: var(--gray-400);
+        }
+        
+        .secondary-button:active {
+            transform: translateY(0);
+            background: var(--gray-300);
+        }
+        
+        /* Custom Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin: 0;
+        }
+        
+        .modal-body {
+            padding: 24px;
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px 24px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .modal-button {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            min-width: 80px;
+        }
+        
+        .modal-button-primary {
+            background: var(--primary-600);
+            color: white;
+        }
+        
+        .modal-button-primary:hover {
+            background: var(--primary-700);
+        }
+        
+        .modal-button-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        
+        .modal-button-secondary:hover {
+            background: var(--gray-200);
+        }
+        
+        .modal-button-danger {
+            background: var(--error-600);
+            color: white;
+        }
+        
+        .modal-button-danger:hover {
+            background: var(--error-700);
+        }
+        
+        /* Completion Timing Modal Styles */
+        .timing-option-btn {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .timing-option-btn:hover {
+            border-color: var(--primary-300);
+            background: var(--primary-25);
+            transform: translateY(-1px);
+        }
+        
+        .timing-option-btn:active {
+            transform: translateY(0);
+            background: var(--primary-50);
+        }
+        
+        .timing-option-main {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--gray-900);
+            margin-bottom: 2px;
+        }
+        
+        .timing-option-subtitle {
+            font-size: 13px;
+            color: var(--gray-600);
+            margin: 0;
+        }
+        
+        /* Type Selection Styles - Enhanced Toggle Design */
+        .type-selection-container {
+            margin-bottom: var(--space-4);
+        }
+        
+        /* Enhanced Toggle Buttons - Gentle Tech Style */
+        .type-toggle-buttons {
+            display: flex;
+            gap: var(--space-4);
+        }
+        
+        .type-toggle-btn {
+            flex: 1;
+            padding: var(--space-3) var(--space-4);
+            border: 2px solid var(--gray-200);
+            background: white;
+            border-radius: var(--radius-xl);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-2);
+            min-height: 60px;
+            justify-content: center;
+        }
+        
+        .type-toggle-btn .icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        
+        .type-toggle-btn .label {
+            font-family: var(--font-primary);
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: var(--gray-700);
+            line-height: 1.1;
+        }
+        
+        .type-toggle-btn:hover {
+            border-color: var(--primary-300);
+            background: var(--primary-50);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .type-toggle-btn.active {
+            border-color: var(--primary-600);
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .type-toggle-btn.active .label {
+            color: white;
+        }
+        
+        .type-toggle-btn.active:hover {
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .type-toggle-btn:active {
+            transform: translateY(0);
+        }
+        
+        .type-toggle-btn.active::after {
+            content: '✓';
+            position: absolute;
+            top: var(--space-3);
+            right: var(--space-3);
+            font-size: 0.875rem;
+            font-weight: bold;
+            color: white;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        
+        .content-section {
+            padding: 16px;
+        }
+        
+        .section-header {
+            padding: 0 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-title {
+            font-family: var(--font-primary);
+            font-size: 1.375rem;
+            font-weight: 800;
+            color: var(--gray-800);
+        }
+        
+        .section-divider {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--gray-300), transparent);
+        }
+        
+        .schedule-item {
+            margin: 0 0 8px;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .schedule-item.status-due {
+            border-color: var(--error-300);
+            background: linear-gradient(135deg, var(--error-50) 0%, white 100%);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+        }
+        
+        .schedule-item.status-upcoming {
+            border-color: var(--warning-300);
+            background: linear-gradient(135deg, var(--warning-50) 0%, white 100%);
+        }
+        
+        .schedule-item.status-completed {
+            border-color: var(--success-300);
+            background: linear-gradient(135deg, var(--success-50) 0%, white 100%);
+            opacity: 0.8;
+        }
+        
+        /* Compact Configuration Cards */
+        .config-card {
+            margin: 0 0 6px;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 8px 12px;
+            box-shadow: var(--shadow-xs);
+            transition: all 0.2s ease;
+        }
+        
+        .config-card:hover {
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+        
+        .config-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        
+        .config-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .config-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .config-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+        }
+        
+        .config-type {
+            font-weight: 600;
+            padding: 2px 6px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+        
+        .config-frequency {
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+        
+        .config-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        
+        .config-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            /* iOS touch optimization */
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+        }
+        
+        .config-btn:hover {
+            background: var(--gray-200);
+            transform: scale(1.1);
+        }
+        
+        .config-btn:active {
+            background: var(--gray-300);
+            transform: scale(0.95);
+        }
+        
+        .config-edit:hover {
+            background: var(--primary-100);
+            color: var(--primary-600);
+        }
+        
+        .config-edit:active {
+            background: var(--primary-200);
+            color: var(--primary-700);
+        }
+        
+        .config-delete:hover {
+            background: var(--error-100);
+            color: var(--error-600);
+        }
+        
+        .config-delete:active {
+            background: var(--error-200);
+            color: var(--error-700);
+        }
+        
+        .completion-schedule {
+            margin-top: 12px;
+        }
+        
+        .timing-slot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+            margin: 2px 0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            gap: 8px;
+        }
+        
+        .timing-slot.completed {
+            background: var(--success-50);
+            color: var(--success-700);
+            border: 1px solid var(--success-200);
+        }
+        
+        .timing-slot.due {
+            background: var(--error-50);
+            color: var(--error-700);
+            border: 1px solid var(--error-200);
+        }
+        
+        .timing-slot.upcoming {
+            background: var(--warning-50);
+            color: var(--warning-700);
+            border: 1px solid var(--warning-200);
+        }
+        
+        .completion-delete-btn {
+            background: var(--error-100);
+            color: var(--error-600);
+            border: 1px solid var(--error-300);
+            border-radius: 6px;
+            padding: 4px 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .completion-delete-btn:hover {
+            background: var(--error-200);
+            color: var(--error-700);
+            transform: scale(1.1);
+        }
+        
+        .completion-delete-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .timing-status-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .timing-icon {
+            font-size: 14px;
+            opacity: 0.8;
+            flex-shrink: 0;
+        }
+        
+        .timing-status {
+            text-align: center;
+        }
+        
+        .timing-status {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        .timing-status.completed {
+            background: var(--success-500);
+            color: white;
+        }
+        
+        .timing-status.due {
+            background: var(--error-500);
+            color: white;
+        }
+        
+        .timing-status.upcoming {
+            background: var(--warning-500);
+            color: white;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .item-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-900);
+            line-height: 1.3;
+        }
+        
+        .interval-badge {
+            background: var(--gray-100);
+            color: var(--gray-600);
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .item-timing {
+            margin-bottom: 12px;
+        }
+        
+        .next-due {
+            font-size: 15px;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+        
+        .countdown-timer {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--error-600);
+        }
+        
+        .countdown-timer.upcoming {
+            color: var(--warning-600);
+        }
+        
+        .countdown-timer.normal {
+            color: var(--gray-700);
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .action-button {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .action-done {
+            background: linear-gradient(135deg, var(--success-500) 0%, var(--success-600) 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+        }
+        
+        .action-done:active {
+            transform: scale(0.97);
+        }
+        
+        .action-delete {
+            background: var(--gray-100);
+            color: var(--gray-600);
+            border: 1px solid var(--gray-200);
+            flex: 0 0 auto;
+            padding: 14px;
+        }
+        
+        .action-delete:active {
+            background: var(--error-100);
+            color: var(--error-600);
+        }
+        
+        .action-edit {
+            background: var(--primary-50);
+            color: var(--primary-600);
+            border: 1px solid var(--primary-200);
+            flex: 0 0 auto;
+            padding: 14px;
+        }
+        
+        .action-edit:active {
+            background: var(--primary-100);
+            color: var(--primary-700);
+        }
+        
+        .status-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success-500);
+        }
+        
+        .status-indicator.due {
+            background: var(--error-500);
+            animation: pulse-indicator 2s ease-in-out infinite;
+        }
+        
+        .status-indicator.upcoming {
+            background: var(--warning-500);
+        }
+        
+        @keyframes pulse-indicator {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1); 
+            }
+            50% { 
+                opacity: 0.7; 
+                transform: scale(1.2); 
+            }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 24px 16px;
+            color: var(--gray-500);
+        }
+        
+        .empty-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            opacity: 0.6;
+        }
+        
+        .empty-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .completed-section {
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            padding: var(--space-1);
+            gap: var(--space-1);
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: var(--space-4) var(--space-3);
+            background: none;
+            border: none;
+            font-family: var(--font-primary);
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: var(--radius-lg);
+            position: relative;
+            /* iOS touch optimization */
+            -webkit-appearance: none;
+            appearance: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            min-height: 44px; /* iOS minimum touch target */
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        
+        .nav-tab:hover:not(.active) {
+            background: rgba(147, 51, 234, 0.08);
+            color: var(--primary-700);
+            transform: translateY(-1px);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 24px 0;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .date-nav-btn {
+            background: var(--gray-100);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            color: var(--gray-600);
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .date-nav-btn:hover {
+            background: var(--primary-100);
+            color: var(--primary-600);
+        }
+        
+        .current-date {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .schedule-timeline {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 16px;
+            margin: 0 0 24px 0;
+            overflow: hidden;
+        }
+        
+        .timeline-header {
+            background: var(--gray-50);
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .timeline-date {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .timeline-content {
+            padding: 20px 24px;
+        }
+        
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+        
+        .timeline-time {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-600);
+            min-width: 60px;
+        }
+        
+        .timeline-activity {
+            flex: 1;
+            font-size: 15px;
+            color: var(--gray-700);
+        }
+        
+        .timeline-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-500);
+        }
+        
+        .timeline-status.pending {
+            background: var(--warning-500);
+        }
+        
+        .timeline-status.missed {
+            background: var(--error-500);
+        }
+        
+        /* Mobile Responsive - iPhone 14/15 and smaller */
+        @media (max-width: 480px) {
+            body {
+                padding: 4px;
+            }
+            
+            .app-container {
+                min-height: calc(100vh - 8px);
+                border-radius: 12px;
+            }
+            
+            .header {
+                padding: 24px 16px 16px;
+            }
+            
+            .brand-name {
+                font-size: 22px;
+            }
+            
+            .brand-credit {
+                font-size: 10px;
+            }
+            
+            .form-section,
+            .content-section {
+                padding: 16px;
+            }
+            
+            .schedule-item {
+                margin: 0 0 12px;
+                padding: 16px;
+            }
+            
+            .section-header {
+                padding: 0 0 16px;
+            }
+            
+            .date-selector {
+                margin: 0 0 16px;
+            }
+            
+            .schedule-timeline {
+                margin: 0 0 16px;
+            }
+            
+            .nav-tabs {
+                margin: 8px 8px;
+                padding: 4px;
+                gap: 2px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+            .nav-tabs::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .nav-tab {
+                flex: 0 0 auto;
+                min-width: 70px;
+                padding: 12px 8px;
+                font-size: 0.8125rem;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+        }
+        
+        /* iPhone 14/15 specific optimizations */
+        @media (max-width: 430px) and (min-width: 375px) {
+            .nav-tabs {
+                justify-content: space-between;
+                gap: 1px;
+            }
+            
+            .nav-tab {
+                flex: 1;
+                min-width: 65px;
+                font-size: 0.8125rem;
+                padding: 10px 4px;
+            }
+        }
+        
+        /* Very small screens (iPhone SE, etc.) */
+        @media (max-width: 374px) {
+            .nav-tabs {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            
+            .nav-tab {
+                flex: 1 1 calc(50% - 2px);
+                min-width: 0;
+                font-size: 0.8125rem;
+                padding: 8px 4px;
+            }
+        }
+        
+        /* iOS Safari specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            /* iOS Safari viewport fix */
+            .app-container {
+                min-height: -webkit-fill-available;
+            }
+            
+            /* iOS Safari safe area */
+            body {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            
+            .nav-tabs {
+                padding-bottom: calc(var(--space-1) + env(safe-area-inset-bottom, 0px));
+            }
+        }
+        
+        /* iOS zoom prevention */
+        @media (max-width: 480px) {
+            .form-input,
+            .form-select {
+                font-size: 16px !important; /* Prevent iOS zoom */
+            }
+            
+            /* Keep nav-tab font size custom */
+            .nav-tab {
+                font-size: 0.8125rem !important;
+            }
+            
+            /* Make edit/delete buttons more touch-friendly on mobile */
+            .config-btn {
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 16px !important;
+                border-radius: 8px;
+            }
+            
+            .config-actions {
+                gap: 8px !important;
+            }
+        }
+        
+        @media (max-height: 700px) {
+            .header {
+                padding: 24px 32px 20px;
+            }
+            
+            .brand-name {
+                font-size: 24px;
+            }
+        }
+        
+        .notification-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification-banner.show {
+            transform: translateY(0);
+        }
+        
+        .notification-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            margin-left: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .gesture-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-600);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+        
+        .gesture-indicator.show {
+            opacity: 1;
+        }
+        
+        .swipe-action {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .swipe-action::after {
+            content: '✓ Swipe to complete';
+            position: absolute;
+            top: 0;
+            right: -100%;
+            height: 100%;
+            background: var(--success-500);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            font-weight: 600;
+            transition: right 0.3s ease;
+        }
+        
+        .swipe-action.swiping::after {
+            right: 0;
+        }
+        
+        .trend-card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 0 32px 24px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .trend-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .trend-insight {
+            background: var(--primary-50);
+            border-left: 4px solid var(--primary-500);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .insight-text {
+            font-size: 14px;
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+        
+        .prediction-card {
+            background: linear-gradient(135deg, var(--warning-50) 0%, var(--warning-100) 100%);
+            border: 1px solid var(--warning-200);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .prediction-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--warning-800);
+            margin-bottom: 8px;
+        }
+        
+        .prediction-text {
+            font-size: 13px;
+            color: var(--warning-700);
+        }
+        
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow-xl);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .install-prompt.show {
+            transform: translateY(0);
+        }
+        
+        .install-prompt-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .install-prompt-text {
+            font-size: 14px;
+            color: var(--gray-600);
+            margin-bottom: 16px;
+        }
+        
+        .install-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .install-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .install-btn.primary {
+            background: var(--primary-600);
+            color: white;
+        }
+        
+        .install-btn.secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+    </style>
+</head>
+<body>
+    <div class="notification-banner" id="notificationBanner">
+        <span id="notificationText"></span>
+        <button class="notification-button" onclick="enableNotifications()">Enable</button>
+    </div>
+    
+    <div class="gesture-indicator" id="gestureIndicator"></div>
+    
+    <div class="install-prompt" id="installPrompt">
+        <div class="install-prompt-title">Install Milu Care Clock</div>
+        <div class="install-prompt-text">Install this app on your home screen for quick and easy access when you're on the go.</div>
+        <div class="install-buttons">
+            <button class="install-btn primary" onclick="installApp()">Install</button>
+            <button class="install-btn secondary" onclick="dismissInstall()">Not now</button>
+        </div>
+    </div>
+    
+    <div class="app-container">
+        <header class="header">
+            <div class="brand">
+                <h1 class="brand-name">Milu Care Clock</h1>
+                <div class="brand-credit">rajathverse</div>
+            </div>
+        </header>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab" onclick="switchTab('setup')">Setup</button>
+            <button class="nav-tab" onclick="switchTab('activities')">Activities</button>
+            <button class="nav-tab active" onclick="switchTab('schedule')">Schedule</button>
+            <button class="nav-tab" onclick="switchTab('status')">Status</button>
+            <button class="nav-tab" onclick="switchTab('timeline')">Timeline</button>
+        </div>
+        
+        <div id="setup-tab" class="tab-content">
+            <section class="form-section">
+                <div class="section-header">
+                    <span class="section-title">Add New Activity</span>
+                    <div class="section-divider"></div>
+                </div>
+                <div class="form-grid">
+                    <!-- Row 1: Type Selection (full width) -->
+                    <div class="input-group">
+                        <label class="input-label">Type</label>
+                        
+                        <!-- Enhanced Toggle Buttons -->
+                        <div class="type-selection-container">
+                            <div class="type-toggle-buttons">
+                                <button type="button" class="type-toggle-btn" data-type="medicine" onclick="selectType('medicine')">
+                                    <div class="icon">💊</div>
+                                    <div class="label">Medicine</div>
+                                </button>
+                                <button type="button" class="type-toggle-btn" data-type="activity" onclick="selectType('activity')">
+                                    <div class="icon">🤱</div>
+                                    <div class="label">Care Activity</div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden input to store the selected type -->
+                        <input type="hidden" id="itemType" value="">
+                    </div>
+                    
+                    <!-- Row 2: Template Selection (full width) -->
+                    <div class="input-group" id="templateGroup" style="display: none;">
+                        <label class="input-label" for="activityTemplate">What would you like to track?</label>
+                        <select id="activityTemplate" class="form-input form-select" onchange="handleTemplateChange()">
+                            <option value="">Select template or custom</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Row 3: Frequency and Start Time side by side -->
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label class="input-label" for="intervalHours">Frequency</label>
+                            <select id="intervalHours" class="form-input form-select" onchange="handleFrequencyChange()">
+                                <option value="3" selected>Every 3 hours</option>
+                                <option value="6">Every 6 hours</option>
+                                <option value="8">Every 8 hours</option>
+                                <option value="12">Every 12 hours</option>
+                                <option value="24">Every 24 hours</option>
+                                <option value="custom">Custom frequency</option>
+                            </select>
+                            
+                            <!-- Custom frequency input -->
+                            <div id="customFrequencyGroup" style="display: none; margin-top: 8px;">
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="number" id="customFrequencyHours" class="form-input" style="flex: 1;" min="1" max="168" placeholder="Enter hours" />
+                                    <span style="font-size: 14px; color: var(--gray-600); white-space: nowrap;">hours</span>
+                                </div>
+                                <small style="color: var(--gray-500); font-size: 11px; margin-top: 4px; display: block;">
+                                    Enter custom interval (1-168 hours / 1 week max)
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label" for="startTime">Start Time (Optional)</label>
+                            <input type="time" id="startTime" class="form-input" placeholder="Set specific time for backdating">
+                        </div>
+                    </div>
+                    
+                    <!-- Row 4: Custom Name (full width when shown) -->
+                    <div class="input-group" id="customActivityGroup" style="display: none;">
+                        <label class="input-label" for="itemName">Custom Name</label>
+                        <input type="text" id="itemName" class="form-input" placeholder="Enter custom name" required>
+                        <small style="color: var(--gray-500); font-size: 11px; margin-top: 4px; display: block;">
+                            Leave start time empty to begin now, or set a specific time for backdating
+                        </small>
+                    </div>
+                    
+                    <button class="primary-button" onclick="addItem()">Add to Schedule</button>
+                </div>
+            </section>
+        </div>
+        
+        <div id="activities-tab" class="tab-content">
+            <section class="content-section">
+                <div class="section-header">
+                    <span class="section-title">Configured Activities</span>
+                    <div class="section-divider"></div>
+                </div>
+                <div id="configuredItems"></div>
+            </section>
+        </div>
+        
+        <div id="schedule-tab" class="tab-content active">
+            <section class="content-section">
+                <div class="section-header">
+                    <span class="section-title">Active To-Do List</span>
+                    <div class="section-divider"></div>
+                </div>
+                <div id="activeItems"></div>
+            </section>
+        </div>
+        
+        <div id="status-tab" class="tab-content">
+            <section class="content-section">
+                <div class="section-header">
+                    <span class="section-title">Today's Status Overview</span>
+                    <div class="section-divider"></div>
+                </div>
+                <div id="statusItems"></div>
+            </section>
+        </div>
+        
+        <div id="timeline-tab" class="tab-content">
+            <section class="content-section">
+                <div class="date-selector">
+                    <button class="date-nav-btn" onclick="changeDate(-1)">‹</button>
+                    <div class="current-date" id="timelineDate"></div>
+                    <button class="date-nav-btn" onclick="changeDate(1)">›</button>
+                </div>
+                
+                <div class="schedule-timeline">
+                    <div class="timeline-header">
+                        <div class="timeline-date" id="timelineHeaderDate"></div>
+                    </div>
+                    <div class="timeline-content" id="timelineContent">
+                        <!-- Timeline items will be populated here -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Custom Modal -->
+    <div id="modal-overlay" class="modal-overlay" onclick="handleModalClick(event)">
+        <div id="custom-modal" class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title" class="modal-title"></h2>
+            </div>
+            <div id="modal-body" class="modal-body"></div>
+            <div id="modal-footer" class="modal-footer"></div>
+        </div>
+    </div>
+
+    <script>
+        let items = JSON.parse(localStorage.getItem('babySchedule') || '[]');
+        let currentTimelineDate = new Date();
+        let editingItemId = null; // Track which item is being edited
+        
+        // Helper function to format time with uppercase AM/PM
+        function formatTimeWithAMPM(date) {
+            return date.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true})
+                      .replace(/am/i, 'AM').replace(/pm/i, 'PM');
+        }
+        
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the app
+            renderItems();
+            showTab('schedule');
+        });
+        
+        // Type Selection Function
+        function selectType(type) {
+            // Update hidden input
+            document.getElementById('itemType').value = type;
+            
+            // Update visual selection
+            const buttons = document.querySelectorAll('.type-toggle-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-type="${type}"].type-toggle-btn`).classList.add('active');
+            
+            // Trigger the existing type change logic
+            handleTypeChange();
+        }
+        
+        function handleTypeChange() {
+            const type = document.getElementById('itemType').value;
+            const templateGroup = document.getElementById('templateGroup');
+            const templateSelect = document.getElementById('activityTemplate');
+            const customGroup = document.getElementById('customActivityGroup');
+            const itemNameInput = document.getElementById('itemName');
+            
+            // Reset form
+            templateSelect.innerHTML = '<option value="">Choose from list or type your own</option>';
+            customGroup.style.display = 'none';
+            itemNameInput.value = '';
+            
+            if (type === 'medicine') {
+                templateGroup.style.display = 'block';
+                templateSelect.innerHTML = `
+                    <option value="">Choose from list or type your own</option>
+                    <option value="Vitamin D3">💊 Vitamin D3</option>
+                    <option value="Calcium Syrup">💊 Calcium Syrup</option>
+                    <option value="Multivitamin">💊 Multivitamin</option>
+                    <option value="Iron Drops">💊 Iron Drops</option>
+                    <option value="Probiotic">💊 Probiotic</option>
+                    <option value="custom">✏️ Type Medicine Name</option>
+                `;
+                itemNameInput.placeholder = 'Enter medicine name';
+            } else if (type === 'activity') {
+                templateGroup.style.display = 'block';
+                templateSelect.innerHTML = `
+                    <option value="">Choose from list or type your own</option>
+                    <option value="Breast Feeding">🍼 Breast Feeding</option>
+                    <option value="Tummy Time">🤱 Tummy Time</option>
+                    <option value="Kangaroo Care">❤️ Kangaroo Care</option>
+                    <option value="Diaper Change">🍼 Diaper Change</option>
+                    <option value="Bath Time">🛁 Bath Time</option>
+                    <option value="Play Time">🧸 Play Time</option>
+                    <option value="custom">✏️ Type Activity Name</option>
+                `;
+                itemNameInput.placeholder = 'Enter activity name';
+            } else {
+                templateGroup.style.display = 'none';
+            }
+        }
+        
+        function handleFrequencyChange() {
+            const intervalSelect = document.getElementById('intervalHours');
+            const customFrequencyGroup = document.getElementById('customFrequencyGroup');
+            
+            if (intervalSelect.value === 'custom') {
+                customFrequencyGroup.style.display = 'block';
+                document.getElementById('customFrequencyHours').focus();
+            } else {
+                customFrequencyGroup.style.display = 'none';
+                document.getElementById('customFrequencyHours').value = '';
+            }
+        }
+        
+        function handleTemplateChange() {
+            const template = document.getElementById('activityTemplate').value;
+            const customGroup = document.getElementById('customActivityGroup');
+            const itemNameInput = document.getElementById('itemName');
+            const intervalSelect = document.getElementById('intervalHours');
+            
+            if (template === 'custom') {
+                customGroup.style.display = 'block';
+                itemNameInput.value = '';
+                intervalSelect.value = '3';
+            } else if (template) {
+                customGroup.style.display = 'none';
+                itemNameInput.value = template;
+                intervalSelect.value = '3'; // Default to 3 hours for all templates
+            } else {
+                customGroup.style.display = 'none';
+                itemNameInput.value = '';
+                intervalSelect.value = '3';
+            }
+        }
+        
+        function addItem() {
+            const type = document.getElementById('itemType').value;
+            const template = document.getElementById('activityTemplate').value;
+            const customName = document.getElementById('itemName').value.trim();
+            
+            // Handle custom frequency
+            let intervalHours;
+            const intervalSelect = document.getElementById('intervalHours');
+            if (intervalSelect.value === 'custom') {
+                const customHours = parseInt(document.getElementById('customFrequencyHours').value);
+                if (!customHours || customHours < 1 || customHours > 168) {
+                    showAlert('Invalid Frequency', 'Please enter a valid frequency between 1 and 168 hours (1 week maximum)');
+                    return;
+                }
+                intervalHours = customHours;
+            } else {
+                intervalHours = parseInt(intervalSelect.value);
+            }
+            
+            // Validate type selection
+            if (!type) {
+                showAlert('Missing Information', 'Please select whether this is a Medicine or Care Activity');
+                return;
+            }
+            
+            let name = '';
+            
+            if (template === 'custom') {
+                if (!customName) {
+                    const typeLabel = type === 'medicine' ? 'medicine' : 'activity';
+                    showAlert('Missing Information', `Please enter a custom ${typeLabel} name`);
+                    return;
+                }
+                name = customName;
+            } else if (template) {
+                name = template;
+            } else {
+                showAlert('Missing Information', 'Please choose from the list or type your own name');
+                return;
+            }
+            
+            // Check for duplicate names
+            const existingItem = items.find(item => item.name.toLowerCase() === name.toLowerCase());
+            
+            if (existingItem) {
+                const existingFreq = existingItem.intervalHours;
+                const newFreq = intervalHours;
+                
+                let message = `⚠️ <strong>Activity Already Exists</strong><br><br>`;
+                message += `"<strong>${name}</strong>" is already scheduled for every <strong>${existingFreq} hours</strong>.<br><br>`;
+                message += `<span style="color: #dc2626;">If you need to change the frequency to ${newFreq} hours, please use the <strong>Edit</strong> button on the existing activity instead of creating a duplicate.</span>`;
+                
+                showAlert('Duplicate Activity', message);
+                return;
+            }
+            
+            const now = new Date();
+            const startTimeInput = document.getElementById('startTime').value;
+            
+            // Calculate initial nextDue time
+            let initialTime;
+            let nextDueTime;
+            let shouldMarkAsGiven = false;
+            
+            if (startTimeInput) {
+                // User specified a start time - parse the time input
+                const [hours, minutes] = startTimeInput.split(':');
+                const today = new Date();
+                const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), parseInt(hours), parseInt(minutes));
+                initialTime = startDate.getTime();
+                
+                // If start time is in the past (more than 30 minutes ago), treat as "already given"
+                shouldMarkAsGiven = initialTime < (now.getTime() - 30 * 60 * 1000);
+                
+                if (shouldMarkAsGiven) {
+                    // Start time was in the past, so next due is start time + interval
+                    nextDueTime = initialTime + (intervalHours * 60 * 60 * 1000);
+                } else {
+                    // Start time is in the future or very recent, so next due IS the start time
+                    nextDueTime = initialTime;
+                }
+            } else {
+                // Default to current time
+                initialTime = now.getTime();
+                nextDueTime = initialTime + (intervalHours * 60 * 60 * 1000);
+            }
+            
+            const item = {
+                id: Date.now(),
+                name: name,
+                type: type, // Store whether it's medicine or activity
+                intervalHours: intervalHours,
+                nextDue: nextDueTime,
+                lastGiven: shouldMarkAsGiven ? initialTime : null,
+                completedToday: [],
+                completionHistory: []
+            };
+            
+            // If start time was in the past, automatically add it to completion history
+            if (shouldMarkAsGiven) {
+                const startTimeDate = new Date(initialTime);
+                item.completionHistory = [{
+                    date: initialTime,
+                    time: formatTimeWithAMPM(startTimeDate),
+                    dateString: startTimeDate.toDateString()
+                }];
+                
+                // Add to today's completed list if it's today
+                if (startTimeDate.toDateString() === now.toDateString()) {
+                    item.completedToday = [{
+                        date: initialTime,
+                        time: formatTimeWithAMPM(startTimeDate)
+                    }];
+                }
+            }
+            
+            items.push(item);
+            saveItems();
+            renderItems();
+            
+            // Clear form
+            clearAddForm();
+            
+            const typeLabel = type === 'medicine' ? 'medicine' : 'care activity';
+            let successMessage = `${name} ${typeLabel} has been added to your schedule!`;
+            
+            if (shouldMarkAsGiven) {
+                const startTimeStr = formatTimeWithAMPM(new Date(initialTime));
+                successMessage += `\n\nThe ${startTimeStr} dose has been automatically marked as completed since it was in the past.`;
+            }
+            
+            showAlert('Success', successMessage);
+        }
+        
+        function clearAddForm() {
+            document.getElementById('itemType').value = '';
+            document.getElementById('templateGroup').style.display = 'none';
+            document.getElementById('activityTemplate').value = '';
+            document.getElementById('itemName').value = '';
+            document.getElementById('intervalHours').value = '3';
+            document.getElementById('startTime').value = '';
+            document.getElementById('customActivityGroup').style.display = 'none';
+            document.getElementById('customFrequencyGroup').style.display = 'none';
+            document.getElementById('customFrequencyHours').value = '';
+            
+            // Reset type selection UI
+            const toggleButtons = document.querySelectorAll('.type-toggle-btn');
+            toggleButtons.forEach(btn => btn.classList.remove('active'));
+        }
+        
+        function updateItem() {
+            const template = document.getElementById('activityTemplate').value;
+            const customName = document.getElementById('itemName').value.trim();
+            const startTimeInput = document.getElementById('startTime').value;
+            
+            // Handle custom frequency
+            let intervalHours;
+            const intervalSelect = document.getElementById('intervalHours');
+            if (intervalSelect.value === 'custom') {
+                const customHours = parseInt(document.getElementById('customFrequencyHours').value);
+                if (!customHours || customHours < 1 || customHours > 168) {
+                    showAlert('Invalid Frequency', 'Please enter a valid frequency between 1 and 168 hours (1 week maximum)');
+                    return;
+                }
+                intervalHours = customHours;
+            } else {
+                intervalHours = parseInt(intervalSelect.value);
+            }
+            
+            let name = '';
+            
+            if (template === 'custom') {
+                if (!customName) {
+                    showAlert('Missing Information', 'Please type your custom activity name');
+                    return;
+                }
+                name = customName;
+            } else if (template) {
+                name = template;
+            } else {
+                showAlert('Missing Information', 'Please choose from the list or type your own activity');
+                return;
+            }
+            
+            // Find the item being edited
+            const item = items.find(i => i.id === editingItemId);
+            if (!item) {
+                showAlert('Error', 'Could not find item to update');
+                return;
+            }
+            
+            // Check for duplicate names (excluding the current item being edited)
+            const existingItem = items.find(i => i.id !== editingItemId && i.name.toLowerCase() === name.toLowerCase());
+            
+            if (existingItem) {
+                showAlert('Duplicate Activity', `You already have another activity named "${name}" with ${existingItem.intervalHours}h frequency.\n\nPlease choose a different name or edit the existing "${name}" activity instead.`);
+                return;
+            }
+            
+            // Update the item
+            item.name = name;
+            item.intervalHours = intervalHours;
+            
+            // Recalculate next due time based on start time input or existing completions
+            if (startTimeInput) {
+                // User specified a new start time - parse the time input
+                const now = new Date();
+                const [hours, minutes] = startTimeInput.split(':');
+                const today = new Date();
+                const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), parseInt(hours), parseInt(minutes));
+                const startTime = startDate.getTime();
+                
+                // Check if start time is in the past (auto-complete logic)
+                const shouldMarkAsGiven = startTime < (now.getTime() - 30 * 60 * 1000);
+                
+                if (shouldMarkAsGiven) {
+                    // Add/update completion history
+                    item.lastGiven = startTime;
+                    item.nextDue = startTime + (intervalHours * 60 * 60 * 1000);
+                    
+                    // Update completion history
+                    const startTimeDate = new Date(startTime);
+                    const completionEntry = {
+                        date: startTime,
+                        time: formatTimeWithAMPM(startTimeDate),
+                        dateString: startTimeDate.toDateString()
+                    };
+                    
+                    if (!item.completionHistory) item.completionHistory = [];
+                    // Remove any existing completion for the same time and add the new one
+                    item.completionHistory = item.completionHistory.filter(c => Math.abs(c.date - startTime) > 5 * 60 * 1000);
+                    item.completionHistory.push(completionEntry);
+                    
+                    // Update today's completed list
+                    if (startTimeDate.toDateString() === now.toDateString()) {
+                        if (!item.completedToday) item.completedToday = [];
+                        item.completedToday = item.completedToday.filter(c => Math.abs(c.date - startTime) > 5 * 60 * 1000);
+                        item.completedToday.push({
+                            date: startTime,
+                            time: formatTimeWithAMPM(startTimeDate)
+                        });
+                    }
+                } else {
+                    // Start time is in the future, schedule from that time
+                    item.nextDue = startTime;
+                }
+            } else if (item.completionHistory && item.completionHistory.length > 0) {
+                // No start time specified, use existing completion history
+                const lastCompletion = item.completionHistory.reduce((latest, current) => 
+                    new Date(current.date) > new Date(latest.date) ? current : latest
+                );
+                
+                item.lastGiven = lastCompletion.date;
+                item.nextDue = lastCompletion.date + (intervalHours * 60 * 60 * 1000);
+            } else if (item.lastGiven) {
+                // Fallback to lastGiven if no completion history
+                const lastGiven = new Date(item.lastGiven);
+                item.nextDue = lastGiven.getTime() + (intervalHours * 60 * 60 * 1000);
+            } else {
+                // If no completions at all, set next due to now + interval
+                const now = new Date().getTime();
+                item.nextDue = now + (intervalHours * 60 * 60 * 1000);
+            }
+            
+            saveItems();
+            renderItems();
+            cancelEdit(); // Exit edit mode
+            
+            showAlert('Success', `${name} has been updated successfully!`);
+        }
+        
+        function markAsDone(itemId) {
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+            
+            // Store the item ID for completion timing modal
+            window.completionItemId = itemId;
+            
+            // Show completion timing modal
+            showCompletionTimingModal(item);
+        }
+        
+        function showCompletionTimingModal(item) {
+            const typeIcon = item.type === 'medicine' ? '💊' : '🤱';
+            const overlay = document.getElementById('modal-overlay');
+            const titleEl = document.getElementById('modal-title');
+            const bodyEl = document.getElementById('modal-body');
+            const footerEl = document.getElementById('modal-footer');
+            
+            titleEl.innerHTML = `${typeIcon} Complete ${item.name}`;
+            
+            bodyEl.innerHTML = `
+                <p style="margin-bottom: 20px; color: var(--gray-700);">When was this activity completed?</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="timing-option-btn" onclick="completeActivityAtTime(0)">
+                        <div class="timing-option-main">🕐 Just now</div>
+                        <div class="timing-option-subtitle">Mark as completed right now</div>
+                    </button>
+                    
+                    <button class="timing-option-btn" onclick="completeActivityAtTime(5)">
+                        <div class="timing-option-main">🕐 5 minutes ago</div>
+                        <div class="timing-option-subtitle">Completed 5 minutes ago</div>
+                    </button>
+                    
+                    <button class="timing-option-btn" onclick="completeActivityAtTime(15)">
+                        <div class="timing-option-main">🕐 15 minutes ago</div>
+                        <div class="timing-option-subtitle">Completed 15 minutes ago</div>
+                    </button>
+                    
+                    <button class="timing-option-btn" onclick="completeActivityAtTime(30)">
+                        <div class="timing-option-main">🕐 30 minutes ago</div>
+                        <div class="timing-option-subtitle">Completed 30 minutes ago</div>
+                    </button>
+                    
+                    <button class="timing-option-btn" onclick="completeActivityAtTime(60)">
+                        <div class="timing-option-main">🕐 1 hour ago</div>
+                        <div class="timing-option-subtitle">Completed 1 hour ago</div>
+                    </button>
+                    
+                    <button class="timing-option-btn" onclick="showCustomTimeInput()">
+                        <div class="timing-option-main">⏰ Custom time</div>
+                        <div class="timing-option-subtitle">Enter specific minutes ago</div>
+                    </button>
+                </div>
+                
+                <div id="custom-time-input" style="display: none; margin-top: 15px; padding: 15px; background: var(--gray-50); border-radius: 8px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--gray-700);">Minutes ago:</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" id="customMinutes" class="form-input" style="flex: 1;" min="0" max="720" placeholder="Enter minutes" />
+                        <button class="timing-option-btn" style="padding: 8px 16px; min-height: auto;" onclick="completeActivityAtCustomTime()">
+                            ✓ Complete
+                        </button>
+                    </div>
+                    <small style="color: var(--gray-600); margin-top: 5px; display: block;">Maximum 12 hours (720 minutes) ago</small>
+                </div>
+            `;
+            
+            footerEl.innerHTML = `
+                <button class="modal-button" onclick="hideModal()">
+                    Cancel
+                </button>
+            `;
+            
+            overlay.classList.add('active');
+        }
+        
+        function showCustomTimeInput() {
+            const customInput = document.getElementById('custom-time-input');
+            customInput.style.display = 'block';
+            document.getElementById('customMinutes').focus();
+        }
+        
+        function completeActivityAtTime(minutesAgo) {
+            const itemId = window.completionItemId;
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+            
+            const now = new Date();
+            const completionTime = new Date(now.getTime() - (minutesAgo * 60 * 1000));
+            
+            // Update item timing
+            item.lastGiven = completionTime.getTime();
+            item.nextDue = completionTime.getTime() + (item.intervalHours * 60 * 60 * 1000);
+            
+            // Add to completion history
+            if (!item.completionHistory) item.completionHistory = [];
+            item.completionHistory.push({
+                date: completionTime.getTime(),
+                time: formatTimeWithAMPM(completionTime),
+                dateString: completionTime.toDateString()
+            });
+            
+            // Add to today's completed list if it's today
+            const today = new Date().toDateString();
+            if (!item.completedToday) item.completedToday = [];
+            
+            if (completionTime.toDateString() === today) {
+                item.completedToday = item.completedToday.filter(c => new Date(c.date).toDateString() === today);
+                item.completedToday.push({
+                    date: completionTime.getTime(),
+                    time: formatTimeWithAMPM(completionTime)
+                });
+            }
+            
+            saveItems();
+            renderItems();
+            hideModal();
+            
+            // Show success message
+            const timeStr = minutesAgo === 0 ? 'now' : `${minutesAgo} minutes ago`;
+            showAlert('Completed', `${item.name} marked as completed ${timeStr}!`);
+        }
+        
+        function completeActivityAtCustomTime() {
+            const customMinutes = parseInt(document.getElementById('customMinutes').value);
+            if (isNaN(customMinutes) || customMinutes < 0 || customMinutes > 720) {
+                showAlert('Invalid Time', 'Please enter a valid number of minutes (0-720).');
+                return;
+            }
+            
+            completeActivityAtTime(customMinutes);
+        }
+        
+        function deleteCompletion(itemId, completionId) {
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+            
+            // Show confirmation modal
+            window.deleteCompletionData = { itemId, completionId, item };
+            
+            const completionDate = new Date(parseInt(completionId));
+            const timeString = formatTimeWithAMPM(completionDate);
+            const dateString = completionDate.toLocaleDateString();
+            
+            const typeIcon = item.type === 'medicine' ? '💊' : '🤱';
+            const message = `Are you sure you want to delete this completion?<br><br>`;
+            const detailMessage = `<strong>${typeIcon} ${item.name}</strong><br>`;
+            const completionInfo = `Completed at: <strong>${timeString} on ${dateString}</strong><br><br>`;
+            const warningMessage = `<span style="color: #dc2626;">This will permanently remove this completion from your records and recalculate the next due time.</span>`;
+            
+            showConfirm(
+                'Delete Completion', 
+                message + detailMessage + completionInfo + warningMessage,
+                confirmDeleteCompletion
+            );
+        }
+        
+        function confirmDeleteCompletion() {
+            const { itemId, completionId, item } = window.deleteCompletionData;
+            
+            // Remove from completion history
+            if (item.completionHistory) {
+                item.completionHistory = item.completionHistory.filter(c => c.date.toString() !== completionId);
+            }
+            
+            // Remove from today's completed list if it's from today
+            const completionDate = new Date(parseInt(completionId));
+            const today = new Date().toDateString();
+            if (completionDate.toDateString() === today && item.completedToday) {
+                item.completedToday = item.completedToday.filter(c => c.date.toString() !== completionId);
+            }
+            
+            // Recalculate next due time based on remaining completions
+            if (item.completionHistory && item.completionHistory.length > 0) {
+                // Find the most recent completion
+                const lastCompletion = item.completionHistory.reduce((latest, current) => 
+                    new Date(current.date) > new Date(latest.date) ? current : latest
+                );
+                
+                item.lastGiven = lastCompletion.date;
+                item.nextDue = lastCompletion.date + (item.intervalHours * 60 * 60 * 1000);
+            } else {
+                // No completions left, reset to current time
+                const now = new Date().getTime();
+                item.lastGiven = null;
+                item.nextDue = now;
+            }
+            
+            // Save and refresh all views
+            saveItems();
+            renderItems();
+            
+            showAlert('Success', 'Completion record has been deleted and schedule updated.');
+        }
+        
+        function deleteItem(itemId) {
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+            
+            window.deleteItemId = itemId;
+            showConfirm(
+                'Delete Activity', 
+                `Are you sure you want to delete "<strong>${item.name}</strong>"?<br><br>This will permanently remove the activity and all its completion history.`,
+                confirmDeleteItem
+            );
+        }
+        
+        function confirmDeleteItem() {
+            const itemId = window.deleteItemId;
+            items = items.filter(i => i.id !== itemId);
+            saveItems();
+            renderItems();
+        }
+        
+        function editItem(itemId) {
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+            
+            // Set edit mode
+            editingItemId = itemId;
+            
+            // Pre-populate the form with type and template
+            const itemType = item.type || 'activity'; // Default to activity for backward compatibility
+            document.getElementById('itemType').value = itemType;
+            
+            // Update visual selection
+            selectType(itemType);
+            
+            // Trigger type change to populate templates
+            handleTypeChange();
+            
+            // Set template to custom and fill in the name
+            document.getElementById('activityTemplate').value = 'custom';
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('intervalHours').value = item.intervalHours;
+            document.getElementById('startTime').value = ''; // Leave empty for existing items
+            
+            // Show custom activity group
+            document.getElementById('customActivityGroup').style.display = 'block';
+            
+            // Update button text and switch to setup tab
+            updateFormButton();
+            showTab('setup');
+            
+            // Scroll to form
+            document.querySelector('.form-grid').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function cancelEdit() {
+            editingItemId = null;
+            
+            // Reset form
+            document.getElementById('activityTemplate').value = '';
+            document.getElementById('itemName').value = '';
+            document.getElementById('intervalHours').value = '3';
+            document.getElementById('startTime').value = '';
+            document.getElementById('customActivityGroup').style.display = 'none';
+            
+            updateFormButton();
+        }
+        
+        function updateFormButton() {
+            const button = document.querySelector('.primary-button[onclick="addItem()"]');
+            if (editingItemId) {
+                button.innerHTML = '💾 Update Activity';
+                button.onclick = () => updateItem();
+                
+                // Add cancel button if it doesn't exist
+                if (!document.querySelector('.cancel-edit-button')) {
+                    const cancelButton = document.createElement('button');
+                    cancelButton.type = 'button';
+                    cancelButton.className = 'secondary-button cancel-edit-button';
+                    cancelButton.innerHTML = '❌ Cancel Edit';
+                    cancelButton.onclick = () => cancelEdit();
+                    cancelButton.style.marginTop = '8px';
+                    button.parentNode.appendChild(cancelButton);
+                }
+            } else {
+                button.innerHTML = 'Add to Schedule';
+                button.onclick = () => addItem();
+                
+                // Remove cancel button if it exists
+                const cancelButton = document.querySelector('.cancel-edit-button');
+                if (cancelButton) {
+                    cancelButton.remove();
+                }
+            }
+        }
+        
+        function saveItems() {
+            localStorage.setItem('babySchedule', JSON.stringify(items));
+        }
+        
+        function getTimeRemaining(nextDue) {
+            const now = new Date().getTime();
+            const diff = nextDue - now;
+            
+            if (diff <= 0) return 'DUE NOW!';
+            
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m remaining`;
+            } else {
+                return `${minutes}m remaining`;
+            }
+        }
+        
+        function getItemStatus(nextDue) {
+            const now = new Date().getTime();
+            const diff = nextDue - now;
+            
+            if (diff <= 0) return 'due';
+            if (diff <= 30 * 60 * 1000) return 'upcoming'; // 30 minutes
+            return 'normal';
+        }
+        
+        function renderItems() {
+            renderConfiguredItems();
+            renderActiveItems();
+            renderStatusItems();
+        }
+        
+        function renderConfiguredItems() {
+            const configuredContainer = document.getElementById('configuredItems');
+            if (!configuredContainer) return;
+            
+            if (items.length === 0) {
+                configuredContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚙️</div>
+                        <div class="empty-text">No activities configured.<br>Add your first care activity above.</div>
+                    </div>
+                `;
+            } else {
+                configuredContainer.innerHTML = items.map(item => {
+                    // Add visual markers and styling based on type
+                    const typeIcon = item.type === 'medicine' ? '💊' : '🤱';
+                    const typeLabel = item.type === 'medicine' ? 'Medicine' : 'Activity';
+                    const typeColor = item.type === 'medicine' ? '#dc2626' : '#059669';
+                    
+                    return `
+                    <div class="config-card" style="border-left: 3px solid ${typeColor};">
+                        <div class="config-main">
+                            <div class="config-info">
+                                <div class="config-title">${typeIcon} ${item.name}</div>
+                                <div class="config-meta">
+                                    <span class="config-type" style="color: ${typeColor};">${typeLabel}</span>
+                                    <span class="config-frequency">Every ${item.intervalHours}h</span>
+                                </div>
+                            </div>
+                            <div class="config-actions">
+                                <button class="config-btn config-edit" onclick="editItem(${item.id})" title="Edit">
+                                    ✏️
+                                </button>
+                                <button class="config-btn config-delete" onclick="deleteItem(${item.id})" title="Remove">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                }).join('');
+            }
+        }
+        
+        function renderActiveItems() {
+            const activeContainer = document.getElementById('activeItems');
+            if (!activeContainer) return;
+            
+            const now = new Date();
+            
+            // Filter items that need attention (due or upcoming)
+            const activeItems = items
+                .filter(item => {
+                    const nextDue = new Date(item.nextDue);
+                    return nextDue.getTime() > 0;
+                })
+                .sort((a, b) => a.nextDue - b.nextDue);
+            
+            if (activeItems.length === 0) {
+                activeContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">✅</div>
+                        <div class="empty-text">All caught up!<br>No activities need attention right now.</div>
+                    </div>
+                `;
+            } else {
+                activeContainer.innerHTML = activeItems.map(item => {
+                    const status = getItemStatus(item.nextDue);
+                    const timeRemaining = getTimeRemaining(item.nextDue);
+                    const nextDueTime = formatTimeWithAMPM(new Date(item.nextDue));
+                    
+                    // Add type markers
+                    const typeIcon = item.type === 'medicine' ? '💊' : '🤱';
+                    const typeColor = item.type === 'medicine' ? '#dc2626' : '#059669';
+                    
+                    return `
+                        <div class="schedule-item status-${status}" style="border-left: 4px solid ${typeColor};">
+                            <div class="status-indicator ${status}"></div>
+                            <div class="item-header">
+                                <h3 class="item-title">${typeIcon} ${item.name}</h3>
+                                <span class="interval-badge">Every ${item.intervalHours}h</span>
+                            </div>
+                            <div class="item-timing">
+                                <div class="next-due">Due: ${nextDueTime}</div>
+                                <div class="countdown-timer ${status}">${timeRemaining}</div>
+                            </div>
+                            <div class="item-actions">
+                                <button class="action-button action-done" onclick="markAsDone(${item.id})">
+                                    ✓ Mark Complete
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+        
+        function renderStatusItems() {
+            const statusContainer = document.getElementById('statusItems');
+            if (!statusContainer) return;
+            
+            const today = new Date().toDateString();
+            
+            if (items.length === 0) {
+                statusContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <div class="empty-text">No activities configured.<br>Set up activities in the Setup tab.</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            statusContainer.innerHTML = items.map(item => {
+                const timingSlots = generateTimingSlots(item, today);
+                
+                // Add type markers
+                const typeIcon = item.type === 'medicine' ? '💊' : '🤱';
+                const typeColor = item.type === 'medicine' ? '#dc2626' : '#059669';
+                
+                return `
+                    <div class="schedule-item" style="border-left: 4px solid ${typeColor};">
+                        <div class="item-header">
+                            <h3 class="item-title">${typeIcon} ${item.name}</h3>
+                            <span class="interval-badge">Every ${item.intervalHours}h</span>
+                        </div>
+                        <div class="completion-schedule">
+                            ${timingSlots.map(slot => `
+                                <div class="timing-slot ${slot.status}">
+                                    <span>${slot.time}</span>
+                                    <div class="timing-status-container">
+                                        <span class="timing-status ${slot.status}">${slot.statusText}</span>
+                                    </div>
+                                    ${slot.status === 'completed' && slot.completionId ? 
+                                        `<button class="completion-delete-btn" onclick="deleteCompletion(${item.id}, '${slot.completionId}')" title="Undo completion">
+                                            ❌
+                                        </button>` : ''
+                                    }
+                                    ${slot.status === 'upcoming' ? 
+                                        `<span class="timing-icon" title="Upcoming">
+                                            ⏰
+                                        </span>` : ''
+                                    }
+                                    ${slot.status === 'due' ? 
+                                        `<span class="timing-icon" title="Overdue">
+                                            ⚠️
+                                        </span>` : ''
+                                    }
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+
+        
+        function generateTimingSlots(item, dateString) {
+            const slots = [];
+            const startOfDay = new Date(dateString + ' 00:00:00').getTime();
+            const endOfDay = new Date(dateString + ' 23:59:59').getTime();
+            const now = new Date().getTime();
+            const isToday = dateString === new Date().toDateString();
+            
+            // Get all completions for this date
+            const dayCompletions = item.completionHistory ? 
+                item.completionHistory.filter(c => new Date(c.date).toDateString() === dateString) : [];
+            
+            if (dayCompletions.length === 0 && !isToday) {
+                // No completions for this date and it's not today, show standard schedule
+                const intervalMs = item.intervalHours * 60 * 60 * 1000;
+                let currentTime = new Date(dateString + ' 06:00:00').getTime();
+                
+                while (currentTime <= endOfDay) {
+                    const timeString = formatTimeWithAMPM(new Date(currentTime));
+                    slots.push({
+                        time: timeString,
+                        status: 'due',
+                        statusText: 'Missed',
+                        timestamp: currentTime
+                    });
+                    currentTime += intervalMs;
+                }
+                return slots;
+            }
+            
+            // For days with completions or today, show actual completion times and calculate next doses
+            if (dayCompletions.length > 0) {
+                // Add all actual completion times
+                dayCompletions.forEach(completion => {
+                    const completionTime = new Date(completion.date).getTime();
+                    const timeString = formatTimeWithAMPM(new Date(completionTime));
+                    slots.push({
+                        time: timeString,
+                        status: 'completed',
+                        statusText: 'Done',
+                        timestamp: completionTime,
+                        completionId: completion.date // Use the completion timestamp as unique ID
+                    });
+                });
+                
+                // Calculate next due times based on last completion
+                if (isToday) {
+                    const lastCompletion = dayCompletions[dayCompletions.length - 1];
+                    const lastCompletionTime = new Date(lastCompletion.date).getTime();
+                    const intervalMs = item.intervalHours * 60 * 60 * 1000;
+                    let nextDueTime = lastCompletionTime + intervalMs;
+                    
+                    // Add upcoming doses for today
+                    while (nextDueTime <= endOfDay) {
+                        const timeString = formatTimeWithAMPM(new Date(nextDueTime));
+                        let status, statusText;
+                        
+                        if (nextDueTime <= now) {
+                            status = 'due';
+                            statusText = 'Due Now';
+                        } else {
+                            status = 'upcoming';
+                            statusText = 'Upcoming';
+                        }
+                        
+                        slots.push({
+                            time: timeString,
+                            status: status,
+                            statusText: statusText,
+                            timestamp: nextDueTime
+                        });
+                        
+                        nextDueTime += intervalMs;
+                    }
+                }
+            } else if (isToday) {
+                // Today with no completions yet - show upcoming schedule starting from now or next logical time
+                const intervalMs = item.intervalHours * 60 * 60 * 1000;
+                let startTime;
+                
+                // If we have a nextDue time from the item, use that
+                if (item.nextDue && item.nextDue >= startOfDay && item.nextDue <= endOfDay) {
+                    startTime = item.nextDue;
+                } else {
+                    // Otherwise start from next reasonable time (current hour rounded up)
+                    const currentHour = new Date(now).getHours();
+                    startTime = new Date(dateString + ' ' + String(currentHour).padStart(2, '0') + ':00:00').getTime();
+                    if (startTime < now) {
+                        startTime += 60 * 60 * 1000; // Next hour
+                    }
+                }
+                
+                let currentTime = startTime;
+                while (currentTime <= endOfDay) {
+                    const timeString = new Date(currentTime).toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true});
+                    let status, statusText;
+                    
+                    if (currentTime <= now) {
+                        status = 'due';
+                        statusText = 'Due Now';
+                    } else {
+                        status = 'upcoming';
+                        statusText = 'Upcoming';
+                    }
+                    
+                    slots.push({
+                        time: timeString,
+                        status: status,
+                        statusText: statusText,
+                        timestamp: currentTime
+                    });
+                    
+                    currentTime += intervalMs;
+                }
+            }
+            
+            // Sort slots by time
+            slots.sort((a, b) => a.timestamp - b.timestamp);
+            
+            return slots;
+        }
+        
+        // Timeline functions
+        function updateTimeline() {
+            const dateElement = document.getElementById('timelineDate');
+            const headerDateElement = document.getElementById('timelineHeaderDate');
+            
+            if (dateElement) {
+                dateElement.textContent = currentTimelineDate.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            }
+            
+            if (headerDateElement) {
+                headerDateElement.textContent = currentTimelineDate.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            }
+            
+            renderTimelineContent();
+        }
+        
+        function renderTimelineContent() {
+            const container = document.getElementById('timelineContent');
+            if (!container) return;
+            
+            const selectedDateString = currentTimelineDate.toDateString();
+            const timelineItems = [];
+            
+            items.forEach(item => {
+                if (item.completionHistory) {
+                    const dayCompletions = item.completionHistory.filter(c => 
+                        new Date(c.date).toDateString() === selectedDateString
+                    );
+                    
+                    dayCompletions.forEach(completion => {
+                        timelineItems.push({
+                            time: completion.time,
+                            activity: item.name,
+                            status: 'completed',
+                            timestamp: completion.date
+                        });
+                    });
+                }
+                
+                // Add scheduled items for today
+                if (selectedDateString === new Date().toDateString()) {
+                    const nextDue = new Date(item.nextDue);
+                    if (nextDue.toDateString() === selectedDateString) {
+                        const status = item.nextDue <= Date.now() ? 'missed' : 'pending';
+                        timelineItems.push({
+                            time: nextDue.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true}),
+                            activity: `${item.name} (scheduled)`,
+                            status: status,
+                            timestamp: item.nextDue
+                        });
+                    }
+                }
+            });
+            
+            // Sort by timestamp
+            timelineItems.sort((a, b) => a.timestamp - b.timestamp);
+            
+            if (timelineItems.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <div class="empty-text">No activities recorded for this date</div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = timelineItems.map(item => `
+                    <div class="timeline-item">
+                        <div class="timeline-time">${item.time}</div>
+                        <div class="timeline-activity">${item.activity}</div>
+                        <div class="timeline-status ${item.status}"></div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function changeDate(direction) {
+            currentTimelineDate.setDate(currentTimelineDate.getDate() + direction);
+            updateTimeline();
+        }
+        
+        // PWA Installation
+        let deferredPrompt;
+        let notificationsEnabled = localStorage.getItem('notificationsEnabled') === 'true';
+        let installPromptDismissed = localStorage.getItem('installPromptDismissed') === 'true';
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isSwiping = false;
+        let activeSwipeElement = null;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (!installPromptDismissed) {
+                setTimeout(() => {
+                    document.getElementById('installPrompt').classList.add('show');
+                }, 3000);
+            }
+        });
+        
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((result) => {
+                    if (result.outcome === 'accepted') {
+                        console.log('PWA installed');
+                    }
+                    deferredPrompt = null;
+                    dismissInstall();
+                });
+            }
+        }
+        
+        function dismissInstall() {
+            document.getElementById('installPrompt').classList.remove('show');
+            localStorage.setItem('installPromptDismissed', 'true');
+        }
+        
+        // Notification System
+        function checkNotificationSupport() {
+            if (!notificationsEnabled && 'Notification' in window) {
+                document.getElementById('notificationBanner').classList.add('show');
+                document.getElementById('notificationText').textContent = 'Enable notifications to never miss a care activity!';
+            }
+        }
+        
+        function enableNotifications() {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        notificationsEnabled = true;
+                        localStorage.setItem('notificationsEnabled', 'true');
+                        document.getElementById('notificationBanner').classList.remove('show');
+                        
+                        // Show success notification
+                        new Notification('Milu Care Clock Notifications Enabled!', {
+                            body: 'You\'ll now receive reminders for baby care activities.',
+                            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%232563eb" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>',
+                            badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle fill="%232563eb" cx="12" cy="12" r="12"/></svg>'
+                        });
+                        
+                        startNotificationScheduler();
+                    }
+                });
+            }
+        }
+        
+        function sendNotification(item, timeUntilDue) {
+            if (!notificationsEnabled || Notification.permission !== 'granted') return;
+            
+            let title, body;
+            if (timeUntilDue <= 0) {
+                title = `⏰ ${item.name} is due now!`;
+                body = `Time for ${item.name}`;
+            } else if (timeUntilDue <= 15 * 60 * 1000) {
+                title = `⏳ ${item.name} due in 15 minutes`;
+                body = `Get ready for ${item.name}`;
+            }
+            
+            if (title) {
+                new Notification(title, {
+                    body: body,
+                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%232563eb" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 6c.55 0 1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V9c0-.55.45-1 1-1zm0 10c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>',
+                    tag: `careclock-${item.id}`,
+                    requireInteraction: true,
+                    actions: [
+                        { action: 'complete', title: 'Mark Complete' },
+                        { action: 'snooze', title: 'Snooze 15min' }
+                    ]
+                });
+            }
+        }
+        
+        function startNotificationScheduler() {
+            setInterval(() => {
+                items.forEach(item => {
+                    const timeUntilDue = item.nextDue - new Date().getTime();
+                    if (timeUntilDue <= 15 * 60 * 1000 && timeUntilDue > -5 * 60 * 1000) {
+                        sendNotification(item, timeUntilDue);
+                    }
+                });
+            }, 60000); // Check every minute
+        }
+        
+        // Gesture Controls
+        function initializeGestureControls() {
+            document.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd, { passive: false });
+        }
+        
+        function handleTouchStart(e) {
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            
+            // Check if touch started on a schedule item
+            const scheduleItem = e.target.closest('.schedule-item');
+            if (scheduleItem && scheduleItem.classList.contains('status-due')) {
+                activeSwipeElement = scheduleItem;
+                scheduleItem.classList.add('swipe-action');
+            }
+        }
+        
+        function handleTouchMove(e) {
+            if (!activeSwipeElement) return;
+            
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+            
+            // Only handle horizontal swipes
+            if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 50) {
+                e.preventDefault();
+                isSwiping = true;
+                activeSwipeElement.classList.add('swiping');
+                showGestureIndicator('Swipe right to complete');
+            }
+        }
+        
+        function handleTouchEnd(e) {
+            if (activeSwipeElement) {
+                if (isSwiping) {
+                    // Extract item ID and mark as done
+                    const completeBtn = activeSwipeElement.querySelector('.action-done');
+                    if (completeBtn) {
+                        const onClick = completeBtn.getAttribute('onclick');
+                        const itemId = onClick.match(/\d+/)[0];
+                        markAsDone(parseInt(itemId));
+                        
+                        // Haptic feedback
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate([100, 50, 100]);
+                        }
+                        
+                        showGestureIndicator('✓ Completed!');
+                    }
+                }
+                
+                activeSwipeElement.classList.remove('swipe-action', 'swiping');
+                activeSwipeElement = null;
+                isSwiping = false;
+            }
+        }
+        
+        function showGestureIndicator(text) {
+            const indicator = document.getElementById('gestureIndicator');
+            indicator.textContent = text;
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+        
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                if (tab.onclick && tab.onclick.toString().includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Update content based on active tab
+            if (tabName === 'setup') {
+                // Setup tab no longer needs to render configured items
+            } else if (tabName === 'activities') {
+                renderConfiguredItems();
+            } else if (tabName === 'schedule') {
+                renderActiveItems();
+            } else if (tabName === 'status') {
+                renderStatusItems();
+            } else if (tabName === 'timeline') {
+                updateTimeline();
+            }
+        }
+        
+        // Initialize the app
+        function initializeApp() {
+            renderItems();
+            updateTimeline();
+            
+            // Initialize form state
+            document.getElementById('customActivityGroup').style.display = 'none';
+            
+            // Start with Setup tab - no longer renders configured items
+        }
+        
+        function snoozeItem(itemId, minutes) {
+            const item = items.find(i => i.id === itemId);
+            if (item) {
+                item.nextDue += minutes * 60 * 1000;
+                saveItems();
+                renderItems();
+            }
+        }
+        
+        // Start the app when page loads
+        window.addEventListener('load', () => {
+            initializeApp();
+            checkNotificationSupport();
+            initializeGestureControls();
+            if (notificationsEnabled) {
+                startNotificationScheduler();
+            }
+            
+            // Service Worker Registration
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+            }
+        });
+        
+        // Handle notification actions
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data && event.data.action === 'notification-click') {
+                    const { action, itemId } = event.data;
+                    
+                    if (action === 'complete') {
+                        markAsDone(itemId);
+                    } else if (action === 'snooze') {
+                        snoozeItem(itemId, 15);
+                    }
+                }
+            });
+        }
+        
+        // Duplicate handling callbacks
+        function handleReplaceExisting() {
+            const data = window.duplicateData;
+            
+            // Replace existing item
+            data.existingItem.intervalHours = data.intervalHours;
+            
+            // Recalculate next due time based on new interval
+            if (data.existingItem.lastGiven) {
+                const lastGiven = new Date(data.existingItem.lastGiven);
+                data.existingItem.nextDue = lastGiven.getTime() + (data.intervalHours * 60 * 60 * 1000);
+            }
+            
+            saveItems();
+            renderItems();
+            
+            // Clear form
+            clearAddForm();
+            
+            showAlert('Success', `${data.name} schedule has been updated from every ${data.existingFreq} hours to every ${data.newFreq} hours!`);
+        }
+        
+        function handleKeepBoth() {
+            const data = window.duplicateData;
+            
+            // Continue with adding new item with modified name
+            const name = `${data.name} (${data.intervalHours}h)`;
+            
+            const now = new Date();
+            const item = {
+                id: Date.now(),
+                name: name,
+                intervalHours: data.intervalHours,
+                nextDue: now.getTime(),
+                lastGiven: null,
+                completedToday: [],
+                completionHistory: []
+            };
+            
+            items.push(item);
+            saveItems();
+            renderItems();
+            
+            clearAddForm();
+            showAlert('Success', `${name} has been added to your schedule!`);
+        }
+        
+        function clearAddForm() {
+            document.getElementById('activityTemplate').value = '';
+            document.getElementById('itemName').value = '';
+            document.getElementById('intervalHours').value = '3';
+            document.getElementById('customActivityGroup').style.display = 'none';
+        }
+        
+        function showDuplicateConfirm(title, message) {
+            console.log('showDuplicateConfirm called with:', title, message);
+            
+            const overlay = document.getElementById('modal-overlay');
+            const titleEl = document.getElementById('modal-title');
+            const bodyEl = document.getElementById('modal-body');
+            const footerEl = document.getElementById('modal-footer');
+            
+            console.log('Modal elements found:', {
+                overlay: !!overlay,
+                titleEl: !!titleEl,
+                bodyEl: !!bodyEl,
+                footerEl: !!footerEl
+            });
+            
+            if (!overlay || !titleEl || !bodyEl || !footerEl) {
+                console.error('Modal elements not found!');
+                // Fallback to system confirm for now
+                if (confirm('You have a duplicate activity. Replace existing?')) {
+                    handleReplaceExisting();
+                } else {
+                    handleKeepBoth();
+                }
+                return;
+            }
+            
+            titleEl.textContent = title;
+            bodyEl.innerHTML = message;
+            
+            // Clear existing footer content
+            footerEl.innerHTML = '';
+            
+            // Create Keep Both button
+            const keepBothBtn = document.createElement('button');
+            keepBothBtn.className = 'modal-button modal-button-secondary';
+            keepBothBtn.textContent = 'Keep Both';
+            keepBothBtn.onclick = handleKeepBothAndClose;
+            keepBothBtn.style.backgroundColor = 'red'; // Temporary debug styling
+            keepBothBtn.style.color = 'white';
+            
+            // Create Replace button
+            const replaceBtn = document.createElement('button');
+            replaceBtn.className = 'modal-button modal-button-primary';
+            replaceBtn.textContent = 'Replace';
+            replaceBtn.onclick = handleReplaceExistingAndClose;
+            replaceBtn.style.backgroundColor = 'blue'; // Temporary debug styling
+            replaceBtn.style.color = 'white';
+            
+            // Add buttons to footer
+            footerEl.appendChild(keepBothBtn);
+            footerEl.appendChild(replaceBtn);
+            
+            console.log('Buttons created and added to footer');
+            console.log('Footer children count:', footerEl.children.length);
+            
+            console.log('Modal content set, showing overlay');
+            overlay.classList.add('active');
+        }
+        
+        function handleKeepBothAndClose() {
+            console.log('Keep Both clicked');
+            hideModal();
+            handleKeepBoth();
+        }
+        
+        function handleReplaceExistingAndClose() {
+            console.log('Replace clicked');
+            hideModal();
+            handleReplaceExisting();
+        }
+        
+        // Custom Modal Functions
+        function showAlert(title, message, callback = null) {
+            const overlay = document.getElementById('modal-overlay');
+            const modal = document.getElementById('custom-modal');
+            const titleEl = document.getElementById('modal-title');
+            const bodyEl = document.getElementById('modal-body');
+            const footerEl = document.getElementById('modal-footer');
+            
+            if (!overlay) {
+                alert(message);
+                if (callback) callback();
+                return;
+            }
+            
+            titleEl.textContent = title;
+            bodyEl.innerHTML = message.replace(/\n/g, '<br>');
+            
+            footerEl.innerHTML = `
+                <button class="modal-button modal-button-primary" onclick="hideModal(); ${callback ? callback.name + '()' : ''}">
+                    OK
+                </button>
+            `;
+            
+            overlay.classList.add('active');
+        }
+        
+        function showConfirm(title, message, onConfirm, onCancel = null) {
+            const overlay = document.getElementById('modal-overlay');
+            const titleEl = document.getElementById('modal-title');
+            const bodyEl = document.getElementById('modal-body');
+            const footerEl = document.getElementById('modal-footer');
+            
+            titleEl.textContent = title;
+            bodyEl.innerHTML = message.replace(/\n/g, '<br>');
+            
+            footerEl.innerHTML = `
+                <button class="modal-button modal-button-secondary" onclick="hideModal(); ${onCancel ? onCancel.name + '()' : ''}">
+                    Cancel
+                </button>
+                <button class="modal-button modal-button-primary" onclick="hideModal(); ${onConfirm.name}()">
+                    OK
+                </button>
+            `;
+            
+            overlay.classList.add('active');
+        }
+        
+        function hideModal() {
+            const overlay = document.getElementById('modal-overlay');
+            overlay.classList.remove('active');
+        }
+        
+        // Close modal when clicking overlay
+        function handleModalClick(event) {
+            if (event.target.id === 'modal-overlay') {
+                hideModal();
+            }
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Force 12-hour format for time inputs
+            const timeInput = document.getElementById('startTime');
+            if (timeInput) {
+                // Try to force 12-hour format
+                timeInput.setAttribute('step', '900'); // 15 minute intervals
+                
+                // Set a sample time briefly to trigger AM/PM display, then clear
+                setTimeout(() => {
+                    const now = new Date();
+                    const hours = now.getHours();
+                    const minutes = Math.floor(now.getMinutes() / 15) * 15; // Round to nearest 15
+                    timeInput.value = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                    setTimeout(() => {
+                        timeInput.value = '';
+                    }, 10);
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>

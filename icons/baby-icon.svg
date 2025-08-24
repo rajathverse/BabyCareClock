@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <style>
+      .baby-head { fill: #fdbcb4; }
+      .baby-hair { fill: #8b4513; }
+      .baby-eyes { fill: #333; }
+      .baby-mouth { fill: #ff6b6b; }
+      .baby-cheeks { fill: #ff9999; opacity: 0.6; }
+      .baby-body { fill: #87ceeb; }
+      .baby-arms { fill: #fdbcb4; }
+      .baby-diaper { fill: #ffffff; stroke: #ddd; stroke-width: 2; }
+      .baby-legs { fill: #fdbcb4; }
+    </style>
+  </defs>
+  
+  <!-- Baby Head -->
+  <circle cx="256" cy="180" r="80" class="baby-head"/>
+  
+  <!-- Baby Hair -->
+  <path d="M180 120 Q200 100 240 110 Q280 100 300 110 Q320 100 340 120 Q330 140 310 130 Q290 120 256 125 Q220 120 200 130 Q180 140 180 120" class="baby-hair"/>
+  
+  <!-- Baby Eyes -->
+  <circle cx="235" cy="165" r="8" class="baby-eyes"/>
+  <circle cx="277" cy="165" r="8" class="baby-eyes"/>
+  
+  <!-- Baby Eye highlights -->
+  <circle cx="238" cy="162" r="3" fill="white"/>
+  <circle cx="280" cy="162" r="3" fill="white"/>
+  
+  <!-- Baby Cheeks -->
+  <circle cx="210" cy="185" r="12" class="baby-cheeks"/>
+  <circle cx="302" cy="185" r="12" class="baby-cheeks"/>
+  
+  <!-- Baby Mouth -->
+  <ellipse cx="256" cy="195" rx="8" ry="5" class="baby-mouth"/>
+  
+  <!-- Baby Body -->
+  <ellipse cx="256" cy="300" rx="60" ry="70" class="baby-body"/>
+  
+  <!-- Baby Arms -->
+  <ellipse cx="180" cy="280" rx="25" ry="40" class="baby-arms"/>
+  <ellipse cx="332" cy="280" rx="25" ry="40" class="baby-arms"/>
+  
+  <!-- Baby Hands -->
+  <circle cx="180" cy="320" r="18" class="baby-arms"/>
+  <circle cx="332" cy="320" r="18" class="baby-arms"/>
+  
+  <!-- Baby Diaper -->
+  <rect x="220" y="340" width="72" height="40" rx="8" class="baby-diaper"/>
+  
+  <!-- Diaper tabs -->
+  <rect x="210" y="350" width="15" height="20" rx="3" class="baby-diaper"/>
+  <rect x="287" y="350" width="15" height="20" rx="3" class="baby-diaper"/>
+  
+  <!-- Baby Legs -->
+  <ellipse cx="235" cy="420" rx="20" ry="50" class="baby-legs"/>
+  <ellipse cx="277" cy="420" rx="20" ry="50" class="baby-legs"/>
+  
+  <!-- Baby Feet -->
+  <ellipse cx="235" cy="470" rx="15" ry="8" class="baby-legs"/>
+  <ellipse cx="277" cy="470" rx="15" ry="8" class="baby-legs"/>
+  
+  <!-- Small heart decoration -->
+  <path d="M256 120 Q250 110 240 115 Q230 120 240 130 Q250 135 256 125 Q262 135 272 130 Q282 120 272 115 Q262 110 256 120" fill="#ff6b6b" opacity="0.7"/>
+</svg>
