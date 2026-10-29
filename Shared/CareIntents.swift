@@ -81,11 +81,11 @@ struct NextUpIntent: AppIntent {
             return .result(dialog: "Nothing is scheduled right now.")
         }
         var sentence = next.due <= now
-            ? "\(next.item.name) is due now."
-            : "\(next.item.name) is next, \(CareFormat.relative(due: next.due, now: now)), at \(next.due.formatted(date: .omitted, time: .shortened))."
+            ? String(localized: "\(next.item.name) is due now.")
+            : String(localized: "\(next.item.name) is next, \(CareFormat.relative(due: next.due, now: now)), at \(next.due.formatted(date: .omitted, time: .shortened)).")
         if schedule.count > 1 {
             let after = schedule[1]
-            sentence += " Then \(after.item.name) at \(after.due.formatted(date: .omitted, time: .shortened))."
+            sentence += " " + String(localized: "Then \(after.item.name) at \(after.due.formatted(date: .omitted, time: .shortened)).")
         }
         return .result(dialog: IntentDialog(stringLiteral: sentence))
     }

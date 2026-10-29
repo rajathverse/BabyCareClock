@@ -149,9 +149,9 @@ struct ToastView: View {
 
 struct EmptyStateCard: View {
     let symbol: String
-    let title: String
-    let message: String
-    var actionTitle: String? = nil
+    let title: LocalizedStringKey
+    let message: LocalizedStringKey
+    var actionTitle: LocalizedStringKey? = nil
     var action: (() -> Void)? = nil
 
     var body: some View {
@@ -195,10 +195,6 @@ extension View {
     }
 }
 
-extension Date {
-    var shortTime: String { formatted(date: .omitted, time: .shortened) }
-}
-
 /// "I'm Vedika's…" Mom / Dad / Grandma / Grandpa / Nanny, or a role typed in.
 struct CaregiverRolePicker: View {
     @Binding var role: String
@@ -207,18 +203,24 @@ struct CaregiverRolePicker: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(babyName.trimmingCharacters(in: .whitespaces).isEmpty ? "I'm the baby's…" : "I'm \(babyName.trimmingCharacters(in: .whitespaces))'s…")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(AppPalette.secondaryText)
+            if babyName.trimmingCharacters(in: .whitespaces).isEmpty {
+                Text("I'm the baby's…")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppPalette.secondaryText)
+            } else {
+                Text("I'm \(babyName.trimmingCharacters(in: .whitespaces))'s…")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppPalette.secondaryText)
+            }
             FlowLayout(spacing: 8) {
                 ForEach(BabyProfile.roleChoices, id: \.self) { choice in
-                    ChoiceChip(title: choice, isSelected: !isOther && role == choice) {
+                    ChoiceChip(title: BabyProfile.displayRole(choice), isSelected: !isOther && role == choice) {
                         isOther = false
                         role = choice
                         SoundManager.shared.selection()
                     }
                 }
-                ChoiceChip(title: "Other", isSelected: isOther) {
+                ChoiceChip(title: String(appLocalized: "Other"), isSelected: isOther) {
                     isOther = true
                     if BabyProfile.roleChoices.contains(role) { role = "" }
                     SoundManager.shared.selection()

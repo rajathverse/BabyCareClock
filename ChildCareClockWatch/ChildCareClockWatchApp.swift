@@ -7,6 +7,8 @@ struct ChildCareClockWatchApp: App {
     var body: some Scene {
         WindowGroup {
             WatchContentView()
+                .id(store.languageCode)
+                .environment(\.locale, AppLanguage.locale)
                 .environmentObject(store)
         }
     }

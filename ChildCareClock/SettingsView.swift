@@ -58,6 +58,15 @@ struct SettingsView: View {
                 }
 
                 Section("About") {
+                    NavigationLink {
+                        LanguagePickerView(beforeChange: saveBaby)
+                    } label: {
+                        LabeledContent {
+                            Text(verbatim: AppLanguage.name)
+                        } label: {
+                            Label("Language", systemImage: "globe")
+                        }
+                    }
                     Button { showingPrivacy = true } label: {
                         Label("Privacy & medical disclaimer", systemImage: "hand.raised.fill")
                     }
@@ -171,17 +180,19 @@ struct SettingsView: View {
         } header: {
             Text("Reminders")
         } footer: {
-            Text(medicineNudgesEnabled
-                 ? "You'll always get a notification with sound and vibration when something is due. If a medicine isn't marked done, it reminds you again \(NotificationScheduler.nudgeMinutes) and \(NotificationScheduler.nudgeMinutes * 2) minutes later."
-                 : "You'll always get a notification with sound and vibration when something is due.")
+            if medicineNudgesEnabled {
+                Text("You'll always get a notification with sound and vibration when something is due. If a medicine isn't marked done, it reminds you again \(NotificationScheduler.nudgeMinutes) and \(NotificationScheduler.nudgeMinutes * 2) minutes later.")
+            } else {
+                Text("You'll always get a notification with sound and vibration when something is due.")
+            }
         }
     }
 
     private var soundFooter: String {
         switch soundMode {
-        case .daytime: return "A soft chime when you tap Done or Snooze, quiet from 9 PM to 7 AM so you only feel a vibration at night. Reminder notifications are not affected."
-        case .always: return "A soft chime when you tap Done or Snooze, at any hour. Reminder notifications are not affected."
-        case .off: return "Only a vibration when you tap Done or Snooze. Reminder notifications are not affected."
+        case .daytime: return String(appLocalized: "A soft chime when you tap Done or Snooze, quiet from 9 PM to 7 AM so you only feel a vibration at night. Reminder notifications are not affected.")
+        case .always: return String(appLocalized: "A soft chime when you tap Done or Snooze, at any hour. Reminder notifications are not affected.")
+        case .off: return String(appLocalized: "Only a vibration when you tap Done or Snooze. Reminder notifications are not affected.")
         }
     }
 
@@ -202,7 +213,7 @@ struct SettingsView: View {
     private func saveBaby() {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let profile = BabyProfile(
-            name: trimmed.isEmpty ? (vm.baby?.name ?? "Baby") : trimmed,
+            name: trimmed.isEmpty ? (vm.baby?.name ?? String(appLocalized: "Baby")) : trimmed,
             birthDate: hasBirthDate ? birthDate : nil,
             caregiverRole: role.trimmingCharacters(in: .whitespacesAndNewlines)
         )
@@ -219,6 +230,37 @@ struct SettingsView: View {
             try? data.write(to: url, options: .atomic)
         }
         return url
+    }
+}
+
+/// Languages listed in their own script. Choosing one switches the whole app straight away.
+private struct LanguagePickerView: View {
+    @AppStorage(AppLanguage.storageKey, store: AppPreferences.defaults) private var languageCode = ""
+    let beforeChange: () -> Void
+
+    var body: some View {
+        List(AppLanguage.options) { option in
+            Button {
+                guard option.code != AppLanguage.code else { return }
+                beforeChange()
+                SoundManager.shared.selection()
+                languageCode = option.code
+            } label: {
+                HStack {
+                    Text(verbatim: option.name)
+                        .foregroundStyle(AppPalette.text)
+                    Spacer()
+                    if option.code == AppLanguage.code {
+                        Image(systemName: "checkmark")
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(AppPalette.primary)
+                    }
+                }
+            }
+        }
+        .softFormBackground()
+        .navigationTitle("Language")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -246,7 +288,7 @@ private struct PrivacyView: View {
         }
     }
 
-    private func block(_ title: String, _ text: String) -> some View {
+    private func block(_ title: LocalizedStringKey, _ text: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.headline)

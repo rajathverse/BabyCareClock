@@ -6,6 +6,7 @@ swiftc \
   "$ROOT/Shared/CareModels.swift" \
   "$ROOT/Shared/CareEngine.swift" \
   "$ROOT/Shared/CarePersistence.swift" \
+  "$ROOT/Shared/AppLanguage.swift" \
   "$ROOT/Shared/Vaccines.swift" \
   "$ROOT/Verification/EngineSmokeTest.swift" \
   -o "$OUTPUT"

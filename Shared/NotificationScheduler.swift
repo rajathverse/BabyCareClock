@@ -15,8 +15,8 @@ enum NotificationScheduler {
     static let nudgeMinutes = 10
 
     static func registerCategories() {
-        let done = UNNotificationAction(identifier: doneAction, title: "Done", options: [], icon: UNNotificationActionIcon(systemImageName: "checkmark.circle.fill"))
-        let snooze = UNNotificationAction(identifier: snoozeAction, title: "Snooze \(snoozeMinutes) min", options: [], icon: UNNotificationActionIcon(systemImageName: "clock.arrow.circlepath"))
+        let done = UNNotificationAction(identifier: doneAction, title: String(appLocalized: "Done"), options: [], icon: UNNotificationActionIcon(systemImageName: "checkmark.circle.fill"))
+        let snooze = UNNotificationAction(identifier: snoozeAction, title: String(appLocalized: "Snooze \(snoozeMinutes) min"), options: [], icon: UNNotificationActionIcon(systemImageName: "clock.arrow.circlepath"))
         let category = UNNotificationCategory(identifier: categoryID, actions: [done, snooze], intentIdentifiers: [], options: [])
         UNUserNotificationCenter.current().setNotificationCategories([category])
     }
@@ -45,7 +45,7 @@ enum NotificationScheduler {
                 center.add(request(
                     id: dueID(item.id),
                     item: item,
-                    title: "\(item.name) is due now",
+                    title: String(appLocalized: "\(item.name) is due now"),
                     body: dueBody(item, babyName: babyName),
                     at: scheduled.due
                 ))
@@ -57,8 +57,8 @@ enum NotificationScheduler {
                     center.add(request(
                         id: nudgeID(item.id, number),
                         item: item,
-                        title: "\(item.name) is still due",
-                        body: "It was due at \(scheduled.due.formatted(date: .omitted, time: .shortened)). Tap Done once it's given.",
+                        title: String(appLocalized: "\(item.name) is still due"),
+                        body: String(appLocalized: "It was due at \(scheduled.due.shortTime). Tap Done once it's given."),
                         at: nudge
                     ))
                 }
@@ -69,8 +69,8 @@ enum NotificationScheduler {
                     center.add(request(
                         id: earlyID(item.id),
                         item: item,
-                        title: "\(item.name) in \(earlyMinutes) min",
-                        body: "Coming up at \(scheduled.due.formatted(date: .omitted, time: .shortened)).",
+                        title: String(appLocalized: "\(item.name) in \(earlyMinutes) min"),
+                        body: String(appLocalized: "Coming up at \(scheduled.due.shortTime)."),
                         at: early
                     ))
                 }
@@ -82,20 +82,21 @@ enum NotificationScheduler {
     private static func scheduleVaccines(state: CareState, now: Date) {
         guard AppPreferences.defaults.bool(forKey: AppPreferences.vaccineRemindersEnabled) else { return }
         let calendar = Calendar.current
-        let babyName = state.baby?.name ?? "Your baby"
+        let babyName = state.baby?.name ?? String(appLocalized: "Your baby")
         let upcoming = VaccineEngine.visits(for: state.vaccines).filter { !$0.isComplete }.prefix(2)
         for visit in upcoming {
-            let count = CareEngine.plural(visit.remaining.count, "vaccine")
-            let day = visit.dueDate.formatted(.dateTime.weekday(.wide).day().month(.wide))
+            let count = CareFormat.vaccines(visit.remaining.count)
+            let day = visit.dueDate.formatted(.dateTime.locale(AppLanguage.locale).weekday(.wide).day().month(.wide))
+            let title = visit.displayTitle
             let reminders: [(String, Int, String)] = [
-                ("vaccine-early-\(visit.id)", -3, "\(babyName)'s \(visit.title) vaccines are due on \(day). Time to book the visit."),
-                ("vaccine-day-\(visit.id)", 0, "\(babyName)'s \(visit.title) vaccines are due today (\(count))."),
+                ("vaccine-early-\(visit.id)", -3, String(appLocalized: "\(babyName)'s \(title) vaccines are due on \(day). Time to book the visit.")),
+                ("vaccine-day-\(visit.id)", 0, String(appLocalized: "\(babyName)'s \(title) vaccines are due today (\(count)).")),
             ]
             for (id, offset, body) in reminders {
                 guard let day = calendar.date(byAdding: .day, value: offset, to: visit.dueDate),
                       let when = calendar.date(bySettingHour: 9, minute: 0, second: 0, of: day), when > now else { continue }
                 let content = UNMutableNotificationContent()
-                content.title = "Vaccination reminder"
+                content.title = String(appLocalized: "Vaccination reminder")
                 content.body = body
                 content.sound = .default
                 let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: when)
@@ -117,7 +118,8 @@ enum NotificationScheduler {
 
     private static func dueBody(_ item: CareItem, babyName: String) -> String {
         var parts: [String] = []
-        parts.append(babyName.isEmpty ? "Time for \(item.name.lowercased())." : "Time for \(babyName)'s \(item.name.lowercased()).")
+        let name = item.name.lowercased()
+        parts.append(babyName.isEmpty ? String(appLocalized: "Time for \(name).") : String(appLocalized: "Time for \(babyName)'s \(name)."))
         if !item.dosage.isEmpty { parts.append(item.dosage) }
         return parts.joined(separator: " · ")
     }

@@ -7,34 +7,34 @@ struct CareReport {
     let state: CareState
     let now: Date
 
-    private var babyName: String { state.baby?.name ?? "Baby" }
+    private var babyName: String { state.baby?.name ?? String(appLocalized: "Baby") }
 
     var entries: [CareTimelineEntry] {
         CareEngine.timeline(for: day, in: state, now: now).filter { $0.kind == .done || $0.kind == .skipped }
     }
 
     var title: String {
-        "\(babyName)'s day · \(day.formatted(.dateTime.weekday(.wide).day().month(.abbreviated)))"
+        String(appLocalized: "\(babyName)'s day · \(day.formatted(.dateTime.locale(AppLanguage.locale).weekday(.wide).day().month(.abbreviated)))")
     }
 
     var text: String {
         var lines = [title, ""]
         let entries = entries
         if entries.isEmpty {
-            lines.append("Nothing logged.")
+            lines.append(String(appLocalized: "Nothing logged."))
         } else {
             for entry in entries {
                 var line = "\(entry.kind == .done ? "✓" : "–") \(entry.date.shortTime)  \(entry.item.name)"
                 let extras = [entry.item.dosage, entry.note].filter { !$0.isEmpty }
                 if !extras.isEmpty { line += " (\(extras.joined(separator: ", ")))" }
-                if entry.kind == .skipped { line += " — skipped" }
+                if entry.kind == .skipped { line += " — " + String(appLocalized: "skipped") }
                 lines.append(line)
             }
             lines.append("")
-            lines.append("Totals: " + totals(entries).map { "\($0.name) ×\($0.count)" }.joined(separator: ", "))
+            lines.append(String(appLocalized: "Totals: \(totals(entries).map { "\($0.name) ×\($0.count)" }.joined(separator: ", "))"))
         }
         lines.append("")
-        lines.append(state.baby?.caregiverTitle.map { "Shared by \($0) from Baby Care Clock" } ?? "Shared from Baby Care Clock")
+        lines.append(state.baby?.caregiverTitle.map { String(appLocalized: "Shared by \($0) from Baby Care Clock") } ?? String(appLocalized: "Shared from Baby Care Clock"))
         return lines.joined(separator: "\n")
     }
 
@@ -82,7 +82,7 @@ private struct ReportCard: View {
                         Text(entry.item.name)
                             .font(.system(.subheadline, design: .rounded, weight: .semibold))
                             .foregroundStyle(AppPalette.text)
-                        let extras = [entry.item.dosage, entry.note, entry.kind == .skipped ? "Skipped" : ""].filter { !$0.isEmpty }
+                        let extras = [entry.item.dosage, entry.note, entry.kind == .skipped ? String(appLocalized: "Skipped") : ""].filter { !$0.isEmpty }
                         if !extras.isEmpty {
                             Text(extras.joined(separator: " · "))
                                 .font(.system(.caption, design: .rounded))
@@ -94,11 +94,11 @@ private struct ReportCard: View {
             }
             if !entries.isEmpty {
                 Divider()
-                Text(report.totals(entries).map { "\($0.name) ×\($0.count)" }.joined(separator: "   "))
+                Text(verbatim: report.totals(entries).map { "\($0.name) ×\($0.count)" }.joined(separator: "   "))
                     .font(.system(.footnote, design: .rounded, weight: .semibold))
                     .foregroundStyle(AppPalette.text)
             }
-            Text("Baby Care Clock")
+            Text(verbatim: "Baby Care Clock")
                 .font(.system(.caption2, design: .rounded, weight: .semibold))
                 .foregroundStyle(AppPalette.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .trailing)

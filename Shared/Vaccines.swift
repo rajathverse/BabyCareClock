@@ -57,6 +57,8 @@ struct VaccineVisit: Identifiable, Equatable {
     let doses: [VaccineDose]
 
     var id: String { "\(title)-\(Int(dueDate.timeIntervalSince1970))" }
+    /// The visit name in the app's language.
+    var displayTitle: String { VaccineSchedule.displayVisitTitle(title) }
     var remaining: [VaccineDose] { doses.filter { $0.givenDate == nil } }
     var isComplete: Bool { remaining.isEmpty }
 }
@@ -98,6 +100,26 @@ struct VaccineSchedule: Identifiable {
     )
 
     static let all = [india]
+
+    /// Visit names are saved in English; this shows them in the app's language.
+    static func displayVisitTitle(_ title: String) -> String {
+        switch title {
+        case "At birth": return String(appLocalized: "At birth")
+        case "6 weeks": return String(appLocalized: "6 weeks")
+        case "10 weeks": return String(appLocalized: "10 weeks")
+        case "14 weeks": return String(appLocalized: "14 weeks")
+        case "6 months": return String(appLocalized: "6 months")
+        case "7 months": return String(appLocalized: "7 months")
+        case "9 months": return String(appLocalized: "9 months")
+        case "12 months": return String(appLocalized: "12 months")
+        case "15 months": return String(appLocalized: "15 months")
+        case "16–18 months": return String(appLocalized: "16–18 months")
+        case "18–19 months": return String(appLocalized: "18–19 months")
+        case "4–6 years": return String(appLocalized: "4–6 years")
+        case "Added by you": return String(appLocalized: "Added by you")
+        default: return title
+        }
+    }
 }
 
 enum VaccineEngine {
@@ -153,11 +175,11 @@ enum VaccineEngine {
         let today = calendar.startOfDay(for: now)
         let days = calendar.dateComponents([.day], from: today, to: visit.dueDate).day ?? 0
         switch days {
-        case 0: return "Due today"
-        case 1: return "Due tomorrow"
-        case 2...: return "In \(CareEngine.plural(days, "day"))"
-        case -1: return "1 day overdue"
-        default: return "\(CareEngine.plural(-days, "day")) overdue"
+        case 0: return String(appLocalized: "Due today")
+        case 1: return String(appLocalized: "Due tomorrow")
+        case 2...: return String(appLocalized: "In \(CareFormat.days(days))")
+        case -1: return String(appLocalized: "1 day overdue")
+        default: return String(appLocalized: "\(CareFormat.days(-days)) overdue")
         }
     }
 }

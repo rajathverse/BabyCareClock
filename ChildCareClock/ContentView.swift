@@ -6,6 +6,7 @@ struct ContentView: View {
     @StateObject private var vm = CareViewModel.shared
     @AppStorage(AppPreferences.appearance, store: AppPreferences.defaults) private var appearance = AppAppearance.system
     @AppStorage(AppPreferences.soundMode, store: AppPreferences.defaults) private var soundMode = SoundMode.daytime
+    @AppStorage(AppLanguage.storageKey, store: AppPreferences.defaults) private var languageCode = ""
     @Environment(\.scenePhase) private var scenePhase
     @State private var selectedTab = Tab.today
 
@@ -33,12 +34,19 @@ struct ContentView: View {
             }
         }
         .animation(.smooth, value: vm.state.isSetUp)
+        // Rebuilt when the language changes so every screen picks up the new words.
+        .id(languageCode)
+        .environment(\.locale, AppLanguage.locale)
         .environmentObject(vm)
         .tint(AppPalette.primary)
         .fontDesign(.rounded)
         .preferredColorScheme(appearance.colorScheme)
         .onAppear {
             SoundManager.shared.mode = soundMode
+            vm.refreshOutsideApp()
+        }
+        .onChange(of: languageCode) { _, _ in
+            NotificationScheduler.registerCategories()
             vm.refreshOutsideApp()
         }
         .onChange(of: soundMode) { _, mode in

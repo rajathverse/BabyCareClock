@@ -10,7 +10,13 @@ struct CompletionSheet: View {
     @State private var customDate = Date()
     @State private var note = ""
 
-    private let quickChoices: [(String, Int)] = [("Just now", 0), ("5 min ago", 5), ("15 min", 15), ("30 min", 30), ("1 hour", 60)]
+    private let quickChoices: [(String, Int)] = [
+        (String(appLocalized: "Just now"), 0),
+        (String(appLocalized: "5 min ago"), 5),
+        (String(appLocalized: "15 min"), 15),
+        (String(appLocalized: "30 min"), 30),
+        (String(appLocalized: "1 hour"), 60),
+    ]
 
     var body: some View {
         NavigationStack {
@@ -46,7 +52,7 @@ struct CompletionSheet: View {
                                     SoundManager.shared.selection()
                                 }
                             }
-                            ChoiceChip(title: "Other time", symbol: "calendar", isSelected: minutesAgo == nil) {
+                            ChoiceChip(title: String(appLocalized: "Other time"), symbol: "calendar", isSelected: minutesAgo == nil) {
                                 minutesAgo = nil
                                 SoundManager.shared.selection()
                             }
@@ -111,19 +117,21 @@ struct CompletionSheet: View {
         guard item.schedule.isAsNeeded, let last = CareEngine.latestEvent(for: item.id, in: vm.state)?.date else { return nil }
         let allowed = last.addingTimeInterval(item.interval)
         guard allowed > Date() else { return nil }
-        return "Last given \(CareFormat.duration(Date().timeIntervalSince(last))) ago. The minimum gap is \(CareFormat.duration(item.interval)), so wait until \(allowed.shortTime) unless your doctor says otherwise."
+        return String(appLocalized: "Last given \(CareFormat.duration(Date().timeIntervalSince(last))) ago. The minimum gap is \(CareFormat.duration(item.interval)), so wait until \(allowed.shortTime) unless your doctor says otherwise.")
     }
 
     private var notePlaceholder: String {
-        switch item.name.lowercased() {
-        case let name where name.contains("feed"): return "e.g. Left side, 15 min"
-        case let name where name.contains("diaper"): return "e.g. Wet and dirty"
-        case let name where name.contains("nap") || name.contains("sleep"): return "e.g. Slept 1h 20m"
-        default: return "Anything worth remembering"
+        // Match ready-made items in any language by their English name.
+        let key = CareTemplate.all.first { $0.name.caseInsensitiveCompare(item.name) == .orderedSame }?.key ?? item.name
+        switch key.lowercased() {
+        case let name where name.contains("feed"): return String(appLocalized: "e.g. Left side, 15 min")
+        case let name where name.contains("diaper"): return String(appLocalized: "e.g. Wet and dirty")
+        case let name where name.contains("nap") || name.contains("sleep"): return String(appLocalized: "e.g. Slept 1h 20m")
+        default: return String(appLocalized: "Anything worth remembering")
         }
     }
 
-    private func sectionTitle(_ title: String) -> some View {
+    private func sectionTitle(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(AppPalette.secondaryText)

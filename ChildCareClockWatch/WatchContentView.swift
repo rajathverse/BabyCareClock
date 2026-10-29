@@ -20,7 +20,7 @@ struct WatchContentView: View {
             TimelineView(.periodic(from: .now, by: 30)) { context in
                 list(now: context.date)
             }
-            .navigationTitle(store.state.baby?.caregiverTitle ?? store.state.baby?.name ?? "Care Clock")
+            .navigationTitle(store.state.baby?.caregiverTitle ?? store.state.baby?.name ?? String(appLocalized: "Care Clock"))
         }
         .tint(WatchPalette.primary)
     }
@@ -73,7 +73,7 @@ struct WatchContentView: View {
                             } label: {
                                 WatchRow(
                                     item: entry.item,
-                                    detail: entry.okAfter.map { "Wait until \($0.formatted(date: .omitted, time: .shortened))" } ?? "OK to give",
+                                    detail: entry.okAfter.map { String(appLocalized: "Wait until \($0.shortTime)") } ?? String(appLocalized: "OK to give"),
                                     detailColor: entry.okAfter == nil ? WatchPalette.done : WatchPalette.soon
                                 )
                             }

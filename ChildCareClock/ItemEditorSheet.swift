@@ -22,9 +22,9 @@ struct ItemEditorSheet: View {
         var id: String { rawValue }
         var title: String {
             switch self {
-            case .every: return "Interval"
-            case .times: return "Set times"
-            case .asNeeded: return "As needed"
+            case .every: return String(appLocalized: "Interval")
+            case .times: return String(appLocalized: "Set times")
+            case .asNeeded: return String(appLocalized: "As needed")
             }
         }
     }
@@ -37,9 +37,9 @@ struct ItemEditorSheet: View {
         var id: String { rawValue }
         var title: String {
             switch self {
-            case .dueNow: return "Due now"
-            case .doneAt: return "Already done"
-            case .dueAt: return "Due later"
+            case .dueNow: return String(appLocalized: "Due now")
+            case .doneAt: return String(appLocalized: "Already done")
+            case .dueAt: return String(appLocalized: "Due later")
             }
         }
     }
@@ -47,6 +47,10 @@ struct ItemEditorSheet: View {
     @EnvironmentObject private var vm: CareViewModel
     @Environment(\.dismiss) private var dismiss
     let mode: Mode
+    /// During first-time setup there's no care plan yet: new items are checked against `draft`
+    /// and handed back through `onCreate` instead of being saved.
+    var draft: CareState? = nil
+    var onCreate: ((CareItem, Date?) -> Void)? = nil
 
     @State private var kind: CareKind
     @State private var name: String
@@ -63,14 +67,18 @@ struct ItemEditorSheet: View {
     @State private var startDate = Date()
     @State private var errorMessage: String?
     @State private var confirmingDelete = false
+    /// "Custom" chosen in the add sheet: the name and icon fields appear.
+    @State private var isCustom = false
 
     private let everyPresets = [60, 120, 180, 240, 360, 480, 720, 1440]
     private let gapPresets = [240, 360, 480, 720]
     private let coursePresets = [3, 5, 7, 10, 14]
     private static let defaultTimes = [540]
 
-    init(mode: Mode) {
+    init(mode: Mode, draft: CareState? = nil, onCreate: ((CareItem, Date?) -> Void)? = nil) {
         self.mode = mode
+        self.draft = draft
+        self.onCreate = onCreate
         let today = Calendar.current.startOfDay(for: Date())
         switch mode {
         case .new(let kind):
@@ -124,7 +132,7 @@ struct ItemEditorSheet: View {
     }
 
     private var dosageHint: String {
-        CareTemplate.all.first { $0.name.caseInsensitiveCompare(name) == .orderedSame }?.dosageHint.nonEmpty ?? "e.g. 1 drop or 2.5 ml"
+        CareTemplate.all.first { $0.name.caseInsensitiveCompare(name) == .orderedSame }?.dosageHint.nonEmpty ?? String(appLocalized: "e.g. 1 drop or 2.5 ml")
     }
 
     var body: some View {
@@ -139,45 +147,27 @@ struct ItemEditorSheet: View {
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets())
                     }
-                    Section("Quick pick") {
+                    Section {
                         FlowLayout(spacing: 8) {
                             ForEach(CareTemplate.templates(for: kind)) { template in
-                                ChoiceChip(title: template.name, symbol: template.symbol, isSelected: name == template.name) {
+                                ChoiceChip(title: template.name, symbol: template.symbol, isSelected: !isCustom && name == template.name) {
                                     apply(template)
                                 }
                             }
-                        }
-                        .padding(.vertical, 6)
-                    }
-                }
-
-                Section {
-                    HStack(spacing: 12) {
-                        SymbolBadge(symbol: symbol, kind: kind, size: 36)
-                        TextField(kind == .medicine ? "Type any medicine name" : "Type any activity name", text: $name)
-                            .font(.headline)
-                            .textInputAutocapitalization(.words)
-                    }
-                    DisclosureGroup("Icon") {
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 6), spacing: 10) {
-                            ForEach(CareSymbols.choices, id: \.self) { choice in
-                                Button {
-                                    symbol = choice
-                                    SoundManager.shared.selection()
-                                } label: {
-                                    SymbolBadge(symbol: choice, kind: kind, size: 42)
-                                        .overlay(Circle().stroke(AppPalette.primary, lineWidth: symbol == choice ? 2.5 : 0))
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel(choice.replacingOccurrences(of: ".", with: " "))
+                            ChoiceChip(title: String(appLocalized: "Custom"), symbol: "pencil", isSelected: isCustom) {
+                                isCustom = true
+                                name = ""
+                                symbol = kind.defaultSymbol
+                                SoundManager.shared.selection()
                             }
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 6)
+                        if isCustom { nameFields }
+                    } header: {
+                        Text("Pick one, or make your own")
                     }
-                } header: {
-                    Text("Name")
-                } footer: {
-                    if editingItem == nil { Text("Not in the list? Just type your own.") }
+                } else {
+                    Section("Name") { nameFields }
                 }
 
                 repeatSection
@@ -269,6 +259,32 @@ struct ItemEditorSheet: View {
 
     // MARK: Sections
 
+    @ViewBuilder
+    private var nameFields: some View {
+        HStack(spacing: 12) {
+            SymbolBadge(symbol: symbol, kind: kind, size: 36)
+            TextField(kind == .medicine ? "Type any medicine name" : "Type any activity name", text: $name)
+                .font(.headline)
+                .textInputAutocapitalization(.words)
+        }
+        DisclosureGroup("Icon") {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 6), spacing: 10) {
+                ForEach(CareSymbols.choices, id: \.self) { choice in
+                    Button {
+                        symbol = choice
+                        SoundManager.shared.selection()
+                    } label: {
+                        SymbolBadge(symbol: choice, kind: kind, size: 42)
+                            .overlay(Circle().stroke(AppPalette.primary, lineWidth: symbol == choice ? 2.5 : 0))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(choice.replacingOccurrences(of: ".", with: " "))
+                }
+            }
+            .padding(.vertical, 8)
+        }
+    }
+
     private var repeatSection: some View {
         Section {
             Picker("Repeats", selection: $repeatMode) {
@@ -312,22 +328,22 @@ struct ItemEditorSheet: View {
                     }
                 }
                 FlowLayout(spacing: 8) {
-                    ChoiceChip(title: "Once a day", isSelected: times == [540]) { times = [540] }
-                    ChoiceChip(title: "Twice", isSelected: times == [480, 1200]) { times = [480, 1200] }
-                    ChoiceChip(title: "3 times", isSelected: times == [480, 840, 1200]) { times = [480, 840, 1200] }
+                    ChoiceChip(title: String(appLocalized: "Once a day"), isSelected: times == [540]) { times = [540] }
+                    ChoiceChip(title: String(appLocalized: "Twice"), isSelected: times == [480, 1200]) { times = [480, 1200] }
+                    ChoiceChip(title: String(appLocalized: "3 times"), isSelected: times == [480, 840, 1200]) { times = [480, 840, 1200] }
                 }
                 .padding(.vertical, 6)
 
             case .asNeeded:
                 FlowLayout(spacing: 8) {
                     ForEach(gapPresets, id: \.self) { minutes in
-                        ChoiceChip(title: "\(minutes / 60)h", isSelected: intervalMinutes == minutes) {
+                        ChoiceChip(title: String(appLocalized: "\(minutes / 60)h"), isSelected: intervalMinutes == minutes) {
                             intervalMinutes = minutes
                         }
                     }
                 }
                 .padding(.vertical, 6)
-                intervalStepper(title: "At least \(CareFormat.duration(TimeInterval(intervalMinutes * 60))) apart")
+                intervalStepper(title: String(appLocalized: "At least \(CareFormat.duration(TimeInterval(intervalMinutes * 60))) apart"))
             }
         } header: {
             Text("Repeats")
@@ -346,7 +362,7 @@ struct ItemEditorSheet: View {
             if hasEnd {
                 FlowLayout(spacing: 8) {
                     ForEach(coursePresets, id: \.self) { days in
-                        ChoiceChip(title: "\(days) days", isSelected: isCourse(days)) {
+                        ChoiceChip(title: CareFormat.days(days), isSelected: isCourse(days)) {
                             lastDay = courseLastDay(days)
                         }
                     }
@@ -421,14 +437,20 @@ struct ItemEditorSheet: View {
     }
 
     private func presetTitle(_ minutes: Int) -> String {
-        minutes == 1440 ? "Daily" : "\(minutes / 60)h"
+        minutes == 1440 ? String(appLocalized: "Daily") : String(appLocalized: "\(minutes / 60)h")
     }
 
     private func apply(_ template: CareTemplate) {
+        isCustom = false
         name = template.name
         symbol = template.symbol
-        repeatMode = .every
         intervalMinutes = template.intervalMinutes
+        if template.times.isEmpty {
+            repeatMode = .every
+        } else {
+            repeatMode = .times
+            times = template.times
+        }
         SoundManager.shared.selection()
     }
 
@@ -465,7 +487,13 @@ struct ItemEditorSheet: View {
                     firstDue: canChooseStart && start == .dueAt ? startDate : Date(),
                     endDate: endDate
                 )
-                try vm.addItem(item, alreadyDoneAt: canChooseStart && start == .doneAt ? startDate : nil)
+                let doneAt = canChooseStart && start == .doneAt ? startDate : nil
+                if let onCreate {
+                    try CareEngine.validate(item, excluding: nil, in: draft ?? vm.state)
+                    onCreate(item, doneAt)
+                } else {
+                    try vm.addItem(item, alreadyDoneAt: doneAt)
+                }
             }
             dismiss()
         } catch {

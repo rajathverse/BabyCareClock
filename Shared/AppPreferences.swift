@@ -42,9 +42,9 @@ enum SoundMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .daytime: return "Daytime only"
-        case .always: return "Always"
-        case .off: return "Off"
+        case .daytime: return String(appLocalized: "Daytime only")
+        case .always: return String(appLocalized: "Always")
+        case .off: return String(appLocalized: "Off")
         }
     }
 
@@ -65,7 +65,13 @@ enum AppAppearance: String, CaseIterable, Identifiable {
     case dark
 
     var id: String { rawValue }
-    var title: String { rawValue.capitalized }
+    var title: String {
+        switch self {
+        case .system: return String(appLocalized: "System")
+        case .light: return String(appLocalized: "Light")
+        case .dark: return String(appLocalized: "Dark")
+        }
+    }
 
     var colorScheme: ColorScheme? {
         switch self {

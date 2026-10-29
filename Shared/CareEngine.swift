@@ -50,13 +50,13 @@ enum CareValidationError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .missingName:
-            return "Please enter a name."
+            return String(appLocalized: "Please enter a name.")
         case .duplicateName(let name):
-            return "\"\(name)\" is already in your care plan. Edit the existing one instead."
+            return String(appLocalized: "\"\(name)\" is already in your care plan. Edit the existing one instead.")
         case .intervalOutOfRange:
-            return "Choose a time between 30 minutes and 7 days."
+            return String(appLocalized: "Choose a time between 30 minutes and 7 days.")
         case .missingTimes:
-            return "Add at least one time of day."
+            return String(appLocalized: "Add at least one time of day.")
         }
     }
 }
@@ -257,21 +257,27 @@ enum CareEngine {
     static func ageDescription(birthDate: Date, now: Date, calendar: Calendar = .current) -> String {
         let birth = calendar.startOfDay(for: birthDate)
         let today = calendar.startOfDay(for: now)
-        guard birth <= today else { return "Arriving soon" }
+        guard birth <= today else { return String(appLocalized: "Arriving soon") }
         let days = calendar.dateComponents([.day], from: birth, to: today).day ?? 0
-        if days == 0 { return "Born today" }
-        if days < 14 { return plural(days, "day") + " old" }
-        if days < 91 { return plural(days / 7, "week") + " old" }
-        let parts = calendar.dateComponents([.year, .month], from: birth, to: today)
-        let years = parts.year ?? 0
-        let months = parts.month ?? 0
-        if years == 0 { return plural(months, "month") + " old" }
-        if months == 0 { return plural(years, "year") + " old" }
-        return plural(years, "year") + " " + plural(months, "month") + " old"
-    }
-
-    static func plural(_ count: Int, _ word: String) -> String {
-        "\(count) \(word)\(count == 1 ? "" : "s")"
+        if days == 0 { return String(appLocalized: "Born today") }
+        let age: String
+        if days < 14 {
+            age = CareFormat.days(days)
+        } else if days < 91 {
+            age = CareFormat.weeks(days / 7)
+        } else {
+            let parts = calendar.dateComponents([.year, .month], from: birth, to: today)
+            let years = parts.year ?? 0
+            let months = parts.month ?? 0
+            if years == 0 {
+                age = CareFormat.months(months)
+            } else if months == 0 {
+                age = CareFormat.years(years)
+            } else {
+                age = "\(CareFormat.years(years)) \(CareFormat.months(months))"
+            }
+        }
+        return String(appLocalized: "\(age) old", comment: "Baby's age, e.g. 6 weeks old")
     }
 }
 
@@ -354,17 +360,17 @@ extension CareState {
 enum CareFormat {
     /// "Every 3 hours", "Every 30 min", "Every 1h 30m", "Once a day", "Every 2 days".
     static func interval(_ minutes: Int) -> String {
-        if minutes == 1440 { return "Once a day" }
-        if minutes % 1440 == 0 { return "Every \(minutes / 1440) days" }
-        if minutes < 60 { return "Every \(minutes) min" }
-        if minutes % 60 == 0 { return minutes == 60 ? "Every hour" : "Every \(minutes / 60) hours" }
-        return "Every \(minutes / 60)h \(minutes % 60)m"
+        if minutes == 1440 { return String(appLocalized: "Once a day") }
+        if minutes % 1440 == 0 { return String(appLocalized: "Every \(minutes / 1440) days") }
+        if minutes < 60 { return String(appLocalized: "Every \(minutes) min") }
+        if minutes % 60 == 0 { return minutes == 60 ? String(appLocalized: "Every hour") : String(appLocalized: "Every \(minutes / 60) hours") }
+        return String(appLocalized: "Every \(minutes / 60)h \(minutes % 60)m")
     }
 
     /// "9:00 AM" for minutes after midnight, in the user's locale.
     static func timeOfDay(_ minutes: Int, calendar: Calendar = .current) -> String {
         let date = calendar.date(bySettingHour: minutes / 60, minute: minutes % 60, second: 0, of: Date()) ?? Date()
-        return date.formatted(date: .omitted, time: .shortened)
+        return date.shortTime
     }
 
     /// One line describing how an item repeats, e.g. "Every 3 hours", "Daily at 9:00 AM", "As needed · 6h apart".
@@ -376,14 +382,14 @@ enum CareFormat {
         case .times(let times):
             let sorted = times.sorted()
             text = sorted.count <= 2
-                ? "Daily at " + sorted.map { timeOfDay($0) }.joined(separator: " & ")
-                : "\(sorted.count)× a day"
+                ? String(appLocalized: "Daily at \(sorted.map { timeOfDay($0) }.joined(separator: " & "))")
+                : String(appLocalized: "\(sorted.count)× a day")
         case .asNeeded:
-            text = "As needed · \(duration(item.interval)) apart"
+            text = String(appLocalized: "As needed · \(duration(item.interval)) apart")
         }
         if let end = item.endDate {
             let lastDay = end.addingTimeInterval(-1)
-            text += " · until \(lastDay.formatted(.dateTime.day().month(.abbreviated)))"
+            text += " · " + String(appLocalized: "until \(lastDay.formatted(.dateTime.locale(AppLanguage.locale).day().month(.abbreviated)))")
         }
         return text
     }
@@ -391,19 +397,27 @@ enum CareFormat {
     /// Short duration for countdowns: "1h 10m", "42 min", "2d 3h", "<1 min".
     static func duration(_ seconds: TimeInterval) -> String {
         let totalMinutes = Int((abs(seconds) / 60).rounded(.up))
-        if abs(seconds) < 60 { return "<1 min" }
+        if abs(seconds) < 60 { return String(appLocalized: "<1 min") }
         let days = totalMinutes / 1440
         let hours = (totalMinutes % 1440) / 60
         let minutes = totalMinutes % 60
-        if days > 0 { return hours > 0 ? "\(days)d \(hours)h" : "\(days)d" }
-        if hours > 0 { return minutes > 0 ? "\(hours)h \(minutes)m" : "\(hours)h" }
-        return "\(minutes) min"
+        if days > 0 { return hours > 0 ? String(appLocalized: "\(days)d \(hours)h") : String(appLocalized: "\(days)d") }
+        if hours > 0 { return minutes > 0 ? String(appLocalized: "\(hours)h \(minutes)m") : String(appLocalized: "\(hours)h") }
+        return String(appLocalized: "\(minutes) min")
     }
 
     /// "in 1h 10m", "now", "12 min late".
     static func relative(due: Date, now: Date) -> String {
         let remaining = due.timeIntervalSince(now)
-        if abs(remaining) < 60 { return "due now" }
-        return remaining > 0 ? "in \(duration(remaining))" : "\(duration(remaining)) late"
+        if abs(remaining) < 60 { return String(appLocalized: "due now") }
+        return remaining > 0 ? String(appLocalized: "in \(duration(remaining))") : String(appLocalized: "\(duration(remaining)) late")
     }
+
+    // Counts with the right singular or plural, e.g. "1 day", "3 days".
+    static func days(_ count: Int) -> String { count == 1 ? String(appLocalized: "1 day") : String(appLocalized: "\(count) days") }
+    static func weeks(_ count: Int) -> String { count == 1 ? String(appLocalized: "1 week") : String(appLocalized: "\(count) weeks") }
+    static func months(_ count: Int) -> String { count == 1 ? String(appLocalized: "1 month") : String(appLocalized: "\(count) months") }
+    static func years(_ count: Int) -> String { count == 1 ? String(appLocalized: "1 year") : String(appLocalized: "\(count) years") }
+    static func vaccines(_ count: Int) -> String { count == 1 ? String(appLocalized: "1 vaccine") : String(appLocalized: "\(count) vaccines") }
+    static func items(_ count: Int) -> String { count == 1 ? String(appLocalized: "1 item") : String(appLocalized: "\(count) items") }
 }

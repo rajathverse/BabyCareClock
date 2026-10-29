@@ -51,17 +51,12 @@ final class CareViewModel: ObservableObject {
 
     // MARK: Setup
 
-    func completeOnboarding(baby: BabyProfile, photo: UIImage?, templates: [CareTemplate], now: Date = Date()) {
+    /// `doneAt` holds items the parent said were already done, e.g. a feed an hour ago.
+    func completeOnboarding(baby: BabyProfile, photo: UIImage?, items: [CareItem], doneAt: [UUID: Date] = [:]) {
         var newState = CareState(baby: baby)
-        for template in templates {
-            let item = CareItem(
-                kind: template.kind,
-                name: template.name,
-                symbol: template.symbol,
-                intervalMinutes: template.intervalMinutes,
-                firstDue: now.addingTimeInterval(TimeInterval(template.intervalMinutes * 60))
-            )
+        for item in items {
             try? newState.addItem(item)
+            if let date = doneAt[item.id] { newState.complete(item.id, at: date) }
         }
         setPhoto(photo)
         apply(newState, undoable: false)
@@ -80,8 +75,8 @@ final class CareViewModel: ObservableObject {
             _ = await NotificationScheduler.requestAuthorization()
             refreshOutsideApp()
         }
-        let whose = backup.baby.map { "\($0.name)'s" } ?? "Your"
-        showToast("Welcome back! \(whose) data is restored", symbol: "arrow.counterclockwise.circle.fill", canUndo: false)
+        let message = backup.baby.map { String(appLocalized: "Welcome back! \($0.name)'s data is restored") } ?? String(appLocalized: "Welcome back! Your data is restored")
+        showToast(message, symbol: "arrow.counterclockwise.circle.fill", canUndo: false)
     }
 
     func discardBackup() {
@@ -116,7 +111,7 @@ final class CareViewModel: ObservableObject {
         apply(newState, undoable: true)
         if date != nil {
             SoundManager.shared.done()
-            showToast("Marked as given", symbol: "checkmark.seal.fill", canUndo: true)
+            showToast(String(appLocalized: "Marked as given"), symbol: "checkmark.seal.fill", canUndo: true)
         }
     }
 
@@ -125,7 +120,7 @@ final class CareViewModel: ObservableObject {
         newState.setVisitGiven(visit, on: date)
         apply(newState, undoable: true)
         SoundManager.shared.done()
-        showToast("\(visit.title) vaccines done", symbol: "checkmark.seal.fill", canUndo: true)
+        showToast(String(appLocalized: "\(visit.displayTitle) vaccines done"), symbol: "checkmark.seal.fill", canUndo: true)
     }
 
     func updateVaccine(_ dose: VaccineDose) {
@@ -140,11 +135,23 @@ final class CareViewModel: ObservableObject {
         apply(newState, undoable: false)
     }
 
+    /// Vaccines read from a photo of the card and checked by the parent.
+    func addScannedVaccines(_ scanned: [ScannedVaccine], birthDate: Date) {
+        var newState = state
+        if newState.baby?.birthDate == nil { newState.baby?.birthDate = birthDate }
+        for vaccine in scanned {
+            let name = vaccine.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !name.isEmpty else { continue }
+            newState.vaccines.append(VaccineDose(name: name, visit: "Added by you", dueDate: vaccine.date, givenDate: vaccine.isGiven ? vaccine.date : nil, dueDateEdited: true))
+        }
+        apply(newState, undoable: false)
+    }
+
     func deleteVaccine(_ id: UUID) {
         var newState = state
         newState.deleteVaccine(id)
         apply(newState, undoable: true)
-        showToast("Vaccine removed", symbol: "trash", canUndo: true)
+        showToast(String(appLocalized: "Vaccine removed"), symbol: "trash", canUndo: true)
     }
 
     func setPhoto(_ image: UIImage?) {
@@ -179,7 +186,7 @@ final class CareViewModel: ObservableObject {
         try newState.addItem(item)
         if let doneDate { newState.complete(item.id, at: doneDate) }
         apply(newState, undoable: false)
-        showToast("\(item.name) added", symbol: item.symbol, canUndo: false)
+        showToast(String(appLocalized: "\(item.name) added"), symbol: item.symbol, canUndo: false)
     }
 
     func updateItem(_ item: CareItem) throws {
@@ -194,7 +201,7 @@ final class CareViewModel: ObservableObject {
         newState.deleteItem(id)
         NotificationScheduler.clearDelivered(for: id)
         apply(newState, undoable: true)
-        showToast("\(item.name) removed", symbol: "trash", canUndo: true)
+        showToast(String(appLocalized: "\(item.name) removed"), symbol: "trash", canUndo: true)
     }
 
     // MARK: Logging
@@ -207,8 +214,10 @@ final class CareViewModel: ObservableObject {
         apply(newState, undoable: true)
         SoundManager.shared.done()
         let minutesAgo = Int(Date().timeIntervalSince(date) / 60)
-        let when = minutesAgo < 1 ? "" : " · \(CareFormat.duration(TimeInterval(minutesAgo * 60))) ago"
-        showToast("\(item.name) done\(when)", symbol: "checkmark.circle.fill", canUndo: true)
+        let message = minutesAgo < 1
+            ? String(appLocalized: "\(item.name) done")
+            : String(appLocalized: "\(item.name) done · \(CareFormat.duration(TimeInterval(minutesAgo * 60))) ago")
+        showToast(message, symbol: "checkmark.circle.fill", canUndo: true)
     }
 
     func snooze(_ itemID: UUID, minutes: Int = NotificationScheduler.snoozeMinutes) {
@@ -218,7 +227,7 @@ final class CareViewModel: ObservableObject {
         NotificationScheduler.clearDelivered(for: itemID)
         apply(newState, undoable: true)
         SoundManager.shared.snooze()
-        showToast("\(item.name) snoozed \(minutes) min", symbol: "clock.arrow.circlepath", canUndo: true)
+        showToast(String(appLocalized: "\(item.name) snoozed \(minutes) min"), symbol: "clock.arrow.circlepath", canUndo: true)
     }
 
     func skip(_ itemID: UUID) {
@@ -228,14 +237,14 @@ final class CareViewModel: ObservableObject {
         NotificationScheduler.clearDelivered(for: itemID)
         apply(newState, undoable: true)
         SoundManager.shared.selection()
-        showToast("\(item.name) skipped", symbol: "forward.end.fill", canUndo: true)
+        showToast(String(appLocalized: "\(item.name) skipped"), symbol: "forward.end.fill", canUndo: true)
     }
 
     func deleteEvent(_ id: UUID) {
         var newState = state
         newState.deleteEvent(id)
         apply(newState, undoable: true)
-        showToast("Entry deleted", symbol: "trash", canUndo: true)
+        showToast(String(appLocalized: "Entry deleted"), symbol: "trash", canUndo: true)
     }
 
     func updateEvent(_ id: UUID, date: Date, note: String) {
