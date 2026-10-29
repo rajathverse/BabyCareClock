@@ -70,11 +70,16 @@ struct TodayView: View {
                 .swipeActions(edge: .trailing) { laterSwipes(next.item) }
 
                 if schedule.count > 1 {
-                    Text("LATER")
-                        .font(.caption.weight(.bold))
-                        .tracking(1.2)
-                        .foregroundStyle(AppPalette.secondaryText)
-                        .cardRow(top: 10, bottom: 2)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("LATER")
+                            .font(.caption.weight(.bold))
+                            .tracking(1.2)
+                            .foregroundStyle(AppPalette.secondaryText)
+                        Label("Swipe right for Done · left for Snooze or Skip", systemImage: "hand.draw")
+                            .font(.caption)
+                            .foregroundStyle(AppPalette.secondaryText)
+                    }
+                    .cardRow(top: 10, bottom: 2)
 
                     ForEach(schedule.dropFirst()) { scheduled in
                         Button { completing = scheduled.item } label: {
@@ -107,13 +112,9 @@ struct TodayView: View {
                 }
             }
 
-            if !schedule.isEmpty {
-                Text("Tap to log · swipe for snooze or skip")
-                    .font(.footnote)
-                    .foregroundStyle(AppPalette.secondaryText)
-                    .frame(maxWidth: .infinity)
-                    .cardRow(top: 14, bottom: 24)
-            } else if asNeeded.isEmpty {
+            if !schedule.isEmpty || !asNeeded.isEmpty {
+                Color.clear.frame(height: 24).cardRow()
+            } else {
                 EmptyStateCard(
                     symbol: "list.bullet.clipboard",
                     title: "Nothing to track yet",
@@ -133,10 +134,10 @@ struct TodayView: View {
         HStack(spacing: 14) {
             BabyAvatar(photo: vm.photo, name: vm.baby?.name ?? "", size: 56)
             VStack(alignment: .leading, spacing: 2) {
-                Text(greeting(now) + ",")
+                Text(greeting(now))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(AppPalette.secondaryText)
-                Text(vm.baby?.caregiverTitle ?? vm.baby?.name ?? "Baby")
+                Text(vm.baby?.caregiverTitle ?? vm.baby?.name ?? String(appLocalized: "Baby"))
                     .font(.title2.weight(.bold))
                     .foregroundStyle(AppPalette.text)
                     .lineLimit(1)
@@ -156,10 +157,10 @@ struct TodayView: View {
 
     private func greeting(_ now: Date) -> String {
         switch Calendar.current.component(.hour, from: now) {
-        case 5..<12: return "Good morning"
-        case 12..<17: return "Good afternoon"
-        case 17..<22: return "Good evening"
-        default: return "Hello"
+        case 5..<12: return String(appLocalized: "Good morning,")
+        case 12..<17: return String(appLocalized: "Good afternoon,")
+        case 17..<22: return String(appLocalized: "Good evening,")
+        default: return String(appLocalized: "Hello,")
         }
     }
 
@@ -271,32 +272,32 @@ private struct HeroCard: View {
 
     private func label(_ status: CareStatus) -> String {
         switch status {
-        case .upcoming: return "NEXT UP"
-        case .dueSoon: return "DUE SOON"
-        case .overdue: return "OVERDUE"
+        case .upcoming: return String(appLocalized: "NEXT UP")
+        case .dueSoon: return String(appLocalized: "DUE SOON")
+        case .overdue: return String(appLocalized: "OVERDUE")
         }
     }
 
     private func countdown(_ status: CareStatus) -> String {
         let remaining = scheduled.due.timeIntervalSince(now)
-        if abs(remaining) < 60 { return "Due now" }
-        return remaining > 0 ? "in \(CareFormat.duration(remaining))" : "\(CareFormat.duration(remaining)) late"
+        if abs(remaining) < 60 { return String(appLocalized: "Due now") }
+        return remaining > 0 ? String(appLocalized: "in \(CareFormat.duration(remaining))") : String(appLocalized: "\(CareFormat.duration(remaining)) late")
     }
 
     private var detail: String {
         let item = scheduled.item
         var parts: [String] = []
         if !item.dosage.isEmpty { parts.append(item.dosage) }
-        parts.append("due \(dueText)")
+        parts.append(String(appLocalized: "due \(dueText)"))
         return parts.joined(separator: " · ")
     }
 
     private var dueText: String {
         let calendar = Calendar.current
         if calendar.isDate(scheduled.due, inSameDayAs: now) { return scheduled.due.shortTime }
-        if calendar.isDateInTomorrow(scheduled.due) { return "tomorrow \(scheduled.due.shortTime)" }
-        if calendar.isDateInYesterday(scheduled.due) { return "yesterday \(scheduled.due.shortTime)" }
-        return scheduled.due.formatted(.dateTime.weekday(.abbreviated).hour().minute())
+        if calendar.isDateInTomorrow(scheduled.due) { return String(appLocalized: "tomorrow \(scheduled.due.shortTime)") }
+        if calendar.isDateInYesterday(scheduled.due) { return String(appLocalized: "yesterday \(scheduled.due.shortTime)") }
+        return scheduled.due.formatted(.dateTime.locale(AppLanguage.locale).weekday(.abbreviated).hour().minute())
     }
 }
 
@@ -388,9 +389,9 @@ struct AsNeededRow: View {
 
     private var lastGivenText: String {
         guard let last = entry.lastGiven else {
-            return entry.item.dosage.isEmpty ? "Not given yet" : "\(entry.item.dosage) · not given yet"
+            return entry.item.dosage.isEmpty ? String(appLocalized: "Not given yet") : String(appLocalized: "\(entry.item.dosage) · not given yet")
         }
-        return "Last given \(CareFormat.duration(now.timeIntervalSince(last))) ago"
+        return String(appLocalized: "Last given \(CareFormat.duration(now.timeIntervalSince(last))) ago")
     }
 }
 
@@ -403,10 +404,10 @@ private struct VaccineReminderRow: View {
         HStack(spacing: 14) {
             SymbolBadge(symbol: "syringe.fill", kind: .medicine, size: 44)
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(visit.title) vaccines")
+                Text("\(visit.displayTitle) vaccines")
                     .font(.headline)
                     .foregroundStyle(AppPalette.text)
-                Text("\(VaccineEngine.dueText(for: visit, now: now)) · \(CareEngine.plural(visit.remaining.count, "vaccine"))")
+                Text(verbatim: "\(VaccineEngine.dueText(for: visit, now: now)) · \(CareFormat.vaccines(visit.remaining.count))")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(overdue ? AppPalette.overdueText : AppPalette.soonText)
             }

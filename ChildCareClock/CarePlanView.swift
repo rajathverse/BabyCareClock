@@ -5,6 +5,7 @@ struct CarePlanView: View {
     @State private var editorMode: ItemEditorSheet.Mode?
     @State private var deleting: CareItem?
     @State private var showingVaccines = false
+    @AppStorage("carePlanOpenSections") private var openSections = ""
 
     var body: some View {
         NavigationStack {
@@ -19,53 +20,36 @@ struct CarePlanView: View {
                     )
                     .cardRow(top: 12)
                 }
-                Button { showingVaccines = true } label: {
-                    VaccinesRow(next: VaccineEngine.nextVisit(in: vm.state), isSetUp: !vm.state.vaccines.isEmpty)
+
+                SectionToggle(title: String(appLocalized: "Vaccinations"), isOpen: isOpen(Self.vaccinesSection)) { toggle(Self.vaccinesSection) }
+                    .cardRow(top: 10, bottom: 2)
+                if isOpen(Self.vaccinesSection) {
+                    Button { showingVaccines = true } label: {
+                        VaccinesRow(next: VaccineEngine.nextVisit(in: vm.state), isSetUp: !vm.state.vaccines.isEmpty)
+                    }
+                    .buttonStyle(.plain)
+                    .cardRow(top: 4, bottom: 4)
                 }
-                .buttonStyle(.plain)
-                .cardRow(top: 8, bottom: 8)
 
                 let finished = CareEngine.finished(for: vm.state)
                 let finishedIDs = Set(finished.map(\.id))
-                ForEach(CareKind.allCases) { kind in
+                ForEach([CareKind.care, .medicine]) { kind in
                     let items = vm.state.items.filter { $0.kind == kind && !finishedIDs.contains($0.id) }.sorted { $0.name < $1.name }
                     if !items.isEmpty {
-                        Section {
+                        SectionToggle(title: kind.sectionTitle, isOpen: isOpen(kind.rawValue)) { toggle(kind.rawValue) }
+                            .cardRow(top: 10, bottom: 2)
+                        if isOpen(kind.rawValue) {
                             ForEach(items) { item in
-                                Button { editorMode = .edit(item) } label: {
-                                    PlanRow(item: item, due: CareEngine.nextDue(for: item, in: vm.state), isFinished: false)
-                                }
-                                .buttonStyle(.plain)
-                                .cardRow(top: 4, bottom: 4)
-                                .swipeActions(edge: .trailing) {
-                                    Button(role: .destructive) { deleting = item } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
-                                }
+                                planRow(item, isFinished: false)
                             }
-                        } header: {
-                            Text(kind.sectionTitle.uppercased())
-                                .font(.caption.weight(.bold))
-                                .tracking(1.1)
-                                .foregroundStyle(AppPalette.secondaryText)
-                                .padding(.leading, 4)
                         }
-                        .listSectionSeparator(.hidden)
                     }
                 }
+
                 if !finished.isEmpty {
                     Section {
                         ForEach(finished) { item in
-                            Button { editorMode = .edit(item) } label: {
-                                PlanRow(item: item, due: CareEngine.nextDue(for: item, in: vm.state), isFinished: true)
-                            }
-                            .buttonStyle(.plain)
-                            .cardRow(top: 4, bottom: 4)
-                            .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) { deleting = item } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                            }
+                            planRow(item, isFinished: true)
                         }
                     } header: {
                         Text("FINISHED")
@@ -76,6 +60,7 @@ struct CarePlanView: View {
                     }
                     .listSectionSeparator(.hidden)
                 }
+
                 if !vm.state.items.isEmpty {
                     Text("Tap any item to change its name, times or dosage.")
                         .font(.footnote)
@@ -114,6 +99,61 @@ struct CarePlanView: View {
                 Text("Its reminders and history will be removed too.")
             }
         }
+    }
+}
+
+extension CarePlanView {
+    static let vaccinesSection = "vaccines"
+
+    /// Which sections are open, remembered between visits. All start closed.
+    func isOpen(_ id: String) -> Bool { openSections.split(separator: ",").contains(Substring(id)) }
+
+    func toggle(_ id: String) {
+        var ids = Set(openSections.split(separator: ",").map(String.init))
+        if ids.contains(id) { ids.remove(id) } else { ids.insert(id) }
+        withAnimation(.snappy) { openSections = ids.sorted().joined(separator: ",") }
+        SoundManager.shared.selection()
+    }
+
+    func planRow(_ item: CareItem, isFinished: Bool) -> some View {
+        Button { editorMode = .edit(item) } label: {
+            PlanRow(item: item, due: CareEngine.nextDue(for: item, in: vm.state), isFinished: isFinished)
+        }
+        .buttonStyle(.plain)
+        .cardRow(top: 4, bottom: 4)
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) { deleting = item } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+    }
+}
+
+/// A section heading that opens or closes its section, like a drop-down.
+private struct SectionToggle: View {
+    let title: String
+    let isOpen: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(title.uppercased())
+                    .font(.caption.weight(.bold))
+                    .tracking(1.1)
+                    .foregroundStyle(AppPalette.secondaryText)
+                Spacer()
+                Image(systemName: "chevron.down")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(AppPalette.secondaryText)
+                    .rotationEffect(.degrees(isOpen ? 0 : -90))
+            }
+            .padding(.horizontal, 4)
+            .frame(minHeight: 32)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isOpen ? .isSelected : [])
     }
 }
 
@@ -200,8 +240,8 @@ private struct VaccinesRow: View {
     }
 
     private var subtitle: String {
-        guard isSetUp else { return "Set up the schedule and reminders" }
-        guard let next else { return "All vaccines given" }
-        return "Next: \(next.title) · \(next.dueDate.formatted(.dateTime.day().month(.abbreviated)))"
+        guard isSetUp else { return String(appLocalized: "Set up the schedule and reminders") }
+        guard let next else { return String(appLocalized: "All vaccines given") }
+        return String(appLocalized: "Next: \(next.displayTitle) · \(next.dueDate.formatted(.dateTime.locale(AppLanguage.locale).day().month(.abbreviated)))")
     }
 }

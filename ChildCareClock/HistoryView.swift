@@ -170,9 +170,9 @@ private struct DayChip: View {
     var body: some View {
         Button(action: action) {
             VStack(spacing: 4) {
-                Text(isToday ? "Today" : day.formatted(.dateTime.weekday(.abbreviated)))
+                Text(isToday ? String(appLocalized: "Today") : day.formatted(.dateTime.locale(AppLanguage.locale).weekday(.abbreviated)))
                     .font(.caption2.weight(.semibold))
-                Text(day.formatted(.dateTime.day()))
+                Text(day.formatted(.dateTime.locale(AppLanguage.locale).day()))
                     .font(.title3.weight(.bold))
                     .monospacedDigit()
                 Circle()
@@ -190,7 +190,7 @@ private struct DayChip: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(day.formatted(date: .complete, time: .omitted))
+        .accessibilityLabel(day.formatted(Date.FormatStyle(date: .complete, time: .omitted, locale: AppLanguage.locale)))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
@@ -217,7 +217,7 @@ private struct DaySummary: View {
         let counts = counts
 
         VStack(alignment: .leading, spacing: 10) {
-            Text("\(done.count) done\(skippedText)")
+            Text(verbatim: summaryText(done: done.count))
                 .font(.headline)
                 .foregroundStyle(AppPalette.text)
             if !counts.isEmpty {
@@ -227,7 +227,7 @@ private struct DaySummary: View {
                             Image(systemName: entry.item.symbol)
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(AppPalette.deepTint(for: entry.item.kind))
-                            Text("\(entry.item.name) ×\(entry.count)")
+                            Text(verbatim: "\(entry.item.name) ×\(entry.count)")
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(AppPalette.text)
                         }
@@ -243,9 +243,10 @@ private struct DaySummary: View {
         .glassPanel()
     }
 
-    private var skippedText: String {
+    private func summaryText(done: Int) -> String {
         let skipped = entries.filter { $0.kind == .skipped }.count
-        return skipped > 0 ? " · \(skipped) skipped" : ""
+        let doneText = String(appLocalized: "\(done) done")
+        return skipped > 0 ? doneText + " · " + String(appLocalized: "\(skipped) skipped") : doneText
     }
 }
 
@@ -322,11 +323,11 @@ private struct TimelineRow: View {
             let parts = [entry.note, entry.item.dosage].filter { !$0.isEmpty }
             return parts.isEmpty ? nil : parts.joined(separator: " · ")
         case .skipped:
-            return "Skipped"
+            return String(appLocalized: "Skipped")
         case .overdue:
-            return "Overdue · \(CareFormat.duration(now.timeIntervalSince(entry.date))) late"
+            return String(appLocalized: "Overdue · \(CareFormat.duration(now.timeIntervalSince(entry.date))) late")
         case .planned:
-            return "Planned"
+            return String(appLocalized: "Planned")
         }
     }
 

@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 
 struct VaccinesView: View {
@@ -96,6 +97,12 @@ private struct VaccineSetupView: View {
     @State private var birthDate = Date()
     @State private var markPast = true
     @State private var useSchedule = true
+    @State private var scanning = false
+    @State private var photoItems: [PhotosPickerItem] = []
+    @State private var reading = false
+    @State private var scanned: [ScannedVaccine]?
+    @State private var nothingFound = false
+    @State private var scanUnavailable = false
 
     var body: some View {
         ScrollView {
@@ -109,7 +116,7 @@ private struct VaccineSetupView: View {
                 Text("Never miss a vaccine")
                     .font(.title2.weight(.bold))
                     .foregroundStyle(AppPalette.text)
-                Text("We'll work out each due date from \(vm.baby?.name ?? "your baby")'s birth date and remind you 3 days before and on the day.")
+                Text(setupMessage)
                     .font(.body)
                     .foregroundStyle(AppPalette.secondaryText)
                     .multilineTextAlignment(.center)
@@ -131,8 +138,35 @@ private struct VaccineSetupView: View {
                 .padding(18)
                 .glassPanel()
 
-                Button(useSchedule ? "Create schedule" : "Start my own list") { start() }
-                    .buttonStyle(PrimaryButtonStyle())
+                if useSchedule {
+                    Button("Create schedule") { start() }
+                        .buttonStyle(PrimaryButtonStyle())
+                } else {
+                    if reading {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("Reading the card…")
+                        }
+                        .font(.headline)
+                        .foregroundStyle(AppPalette.primaryDeep)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                    } else {
+                        HStack(spacing: 10) {
+                            Button {
+                                if DocumentScanner.isAvailable { scanning = true } else { scanUnavailable = true }
+                            } label: {
+                                Label("Take a photo", systemImage: "camera.fill")
+                            }
+                            .buttonStyle(PrimaryButtonStyle())
+                            PhotosPicker(selection: $photoItems, maxSelectionCount: 4, matching: .images) {
+                                Label("Upload a photo", systemImage: "photo.on.rectangle")
+                            }
+                            .buttonStyle(PrimaryButtonStyle())
+                        }
+                        Button("Enter manually") { start() }
+                            .buttonStyle(SoftButtonStyle())
+                    }
+                }
 
                 Text("Based on the Indian Academy of Pediatrics (IAP) schedule. It isn't medical advice; your pediatrician's card always comes first, and every date can be changed.")
                     .font(.footnote)
@@ -142,6 +176,61 @@ private struct VaccineSetupView: View {
             .padding(20)
         }
         .onAppear { birthDate = vm.baby?.birthDate ?? Date() }
+        .fullScreenCover(isPresented: $scanning) {
+            DocumentScanner { images in
+                scanning = false
+                read(images)
+            } onCancel: {
+                scanning = false
+            }
+            .ignoresSafeArea()
+        }
+        .sheet(item: Binding(get: { scanned.map(ScanResult.init) }, set: { if $0 == nil { scanned = nil } })) { result in
+            ScanReviewSheet(vaccines: result.vaccines) { checked in
+                vm.addScannedVaccines(checked, birthDate: birthDate)
+            }
+        }
+        .onChange(of: photoItems) { _, items in
+            guard !items.isEmpty else { return }
+            reading = true
+            Task {
+                var images: [UIImage] = []
+                for item in items {
+                    if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) { images.append(image) }
+                }
+                photoItems = []
+                read(images)
+            }
+        }
+        .alert("Couldn't read the card", isPresented: $nothingFound) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("No vaccine names were found. Try again in good light, or enter them manually.")
+        }
+        .alert("Scanning isn't available on this iPhone.", isPresented: $scanUnavailable) {
+            Button("OK", role: .cancel) {}
+        }
+    }
+
+    private struct ScanResult: Identifiable {
+        let vaccines: [ScannedVaccine]
+        let id = UUID()
+    }
+
+    private func read(_ images: [UIImage]) {
+        reading = true
+        Task {
+            let found = await VaccineCardReader.read(images)
+            reading = false
+            if found.isEmpty { nothingFound = true } else { scanned = found }
+        }
+    }
+
+    private var setupMessage: String {
+        if let name = vm.baby?.name {
+            return String(appLocalized: "We'll work out each due date from \(name)'s birth date and remind you 3 days before and on the day.")
+        }
+        return String(appLocalized: "We'll work out each due date from your baby's birth date and remind you 3 days before and on the day.")
     }
 
     private func start() {
@@ -152,7 +241,7 @@ private struct VaccineSetupView: View {
                 baby.birthDate = birthDate
                 vm.updateBaby(baby)
             }
-            vm.addVaccine(name: "First vaccine", dueDate: birthDate)
+            vm.addVaccine(name: String(appLocalized: "First vaccine"), dueDate: birthDate)
         }
     }
 }
@@ -172,14 +261,14 @@ struct NextVisitCard: View {
                     .frame(width: 52, height: 52)
                     .background(AppPalette.medicine.opacity(0.28), in: Circle())
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("NEXT VISIT · \(visit.title.uppercased())")
+                    Text("NEXT VISIT · \(visit.displayTitle.uppercased())")
                         .font(.caption.weight(.heavy))
                         .tracking(1)
                         .foregroundStyle(AppPalette.secondaryText)
                     Text(VaccineEngine.dueText(for: visit, now: now))
                         .font(.title3.weight(.bold))
                         .foregroundStyle(status == .overdue ? AppPalette.overdueText : AppPalette.text)
-                    Text("\(visit.dueDate.formatted(.dateTime.weekday(.wide).day().month(.wide))) · \(CareEngine.plural(visit.remaining.count, "vaccine"))")
+                    Text(verbatim: "\(visit.dueDate.formatted(.dateTime.locale(AppLanguage.locale).weekday(.wide).day().month(.wide))) · \(CareFormat.vaccines(visit.remaining.count))")
                         .font(.subheadline)
                         .foregroundStyle(AppPalette.secondaryText)
                 }
@@ -205,10 +294,10 @@ private struct VisitHeader: View {
         let status = VaccineEngine.status(of: visit, now: now)
         HStack {
             VStack(alignment: .leading, spacing: 1) {
-                Text(visit.title)
+                Text(visit.displayTitle)
                     .font(.headline)
                     .foregroundStyle(AppPalette.text)
-                Text(visit.dueDate.formatted(.dateTime.day().month(.abbreviated).year()))
+                Text(visit.dueDate.formatted(.dateTime.locale(AppLanguage.locale).day().month(.abbreviated).year()))
                     .font(.caption)
                     .foregroundStyle(AppPalette.secondaryText)
             }
@@ -227,10 +316,10 @@ private struct VisitHeader: View {
 
     private func label(_ status: VaccineVisit.Status) -> String {
         switch status {
-        case .given: return "Done"
-        case .overdue: return "Overdue"
+        case .given: return String(appLocalized: "Done")
+        case .overdue: return String(appLocalized: "Overdue")
         case .dueSoon: return VaccineEngine.dueText(for: visit, now: now)
-        case .upcoming: return "Upcoming"
+        case .upcoming: return String(appLocalized: "Upcoming")
         }
     }
 
@@ -281,7 +370,7 @@ private struct DoseRow: View {
 
     private var subtitle: String? {
         var parts: [String] = []
-        if let given = dose.givenDate { parts.append("Given \(given.formatted(.dateTime.day().month(.abbreviated)))") }
+        if let given = dose.givenDate { parts.append(String(appLocalized: "Given \(given.formatted(.dateTime.locale(AppLanguage.locale).day().month(.abbreviated)))")) }
         if !dose.note.isEmpty { parts.append(dose.note) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }

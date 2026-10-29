@@ -3,6 +3,8 @@ import Foundation
 /// What the iPhone and Watch send each other.
 enum WatchPayload {
     static let stateKey = "state"
+    /// The language chosen in the iPhone app.
+    static let languageKey = "language"
 
     /// The Watch only needs each item's latest log and the last day of history.
     static func trimmed(_ state: CareState, now: Date = Date()) -> CareState {

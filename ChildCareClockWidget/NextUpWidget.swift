@@ -14,10 +14,10 @@ struct NextUpProvider: TimelineProvider {
     func placeholder(in context: Context) -> NextUpEntry {
         let now = Date()
         let sample = [
-            ScheduledItem(item: CareItem(kind: .care, name: "Feed", symbol: "drop.fill", intervalMinutes: 180, firstDue: now), due: now.addingTimeInterval(70 * 60)),
-            ScheduledItem(item: CareItem(kind: .medicine, name: "Vitamin D3", symbol: "sun.max.fill", intervalMinutes: 1440, firstDue: now), due: now.addingTimeInterval(4 * 3600)),
+            ScheduledItem(item: CareItem(kind: .care, name: String(appLocalized: "Feed"), symbol: "drop.fill", intervalMinutes: 180, firstDue: now), due: now.addingTimeInterval(70 * 60)),
+            ScheduledItem(item: CareItem(kind: .medicine, name: String(appLocalized: "Vitamin D3"), symbol: "sun.max.fill", intervalMinutes: 1440, firstDue: now), due: now.addingTimeInterval(4 * 3600)),
         ]
-        return NextUpEntry(date: now, babyName: "Baby", upcoming: sample, photo: nil, isSetUp: true)
+        return NextUpEntry(date: now, babyName: String(appLocalized: "Baby"), upcoming: sample, photo: nil, isSetUp: true)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (NextUpEntry) -> Void) {
@@ -74,6 +74,7 @@ struct NextUpWidgetView: View {
             }
         }
         .fontDesign(.rounded)
+        .environment(\.locale, AppLanguage.locale)
         .containerBackground(for: .widget) { background }
     }
 
@@ -139,7 +140,7 @@ struct NextUpWidgetView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
             VStack(alignment: .leading, spacing: 8) {
-                Text(entry.babyName.isEmpty ? "Next up" : entry.babyName)
+                Text(entry.babyName.isEmpty ? String(appLocalized: "Next up") : entry.babyName)
                     .font(.headline)
                     .foregroundStyle(AppPalette.text)
                 if entry.upcoming.isEmpty {
@@ -198,7 +199,7 @@ struct NextUpWidgetView: View {
                     .lineLimit(1)
                 countdown(next)
                     .font(.title3.weight(.semibold))
-                Text("at \(next.due.formatted(date: .omitted, time: .shortened))")
+                Text("at \(next.due.shortTime)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -211,7 +212,7 @@ struct NextUpWidgetView: View {
     @ViewBuilder
     private var inline: some View {
         if let next {
-            Label("\(next.item.name) · \(next.due.formatted(date: .omitted, time: .shortened))", systemImage: next.item.symbol)
+            Label("\(next.item.name) · \(next.due.shortTime)", systemImage: next.item.symbol)
         } else {
             Text("All caught up")
         }

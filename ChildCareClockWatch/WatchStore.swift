@@ -8,6 +8,7 @@ final class WatchStore: NSObject, ObservableObject, WCSessionDelegate {
     static let shared = WatchStore()
 
     @Published private(set) var state: CareState
+    @Published private(set) var languageCode = AppLanguage.code
 
     private static let storageKey = "careState"
 
@@ -61,6 +62,12 @@ final class WatchStore: NSObject, ObservableObject, WCSessionDelegate {
     }
 
     private func receive(_ context: [String: Any]) {
+        if let language = context[WatchPayload.languageKey] as? String {
+            DispatchQueue.main.async {
+                AppLanguage.code = language
+                self.languageCode = language
+            }
+        }
         guard let data = context[WatchPayload.stateKey] as? Data, let received = try? CarePersistence.decode(data) else { return }
         DispatchQueue.main.async { self.apply(received) }
     }

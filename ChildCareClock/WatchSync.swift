@@ -17,7 +17,7 @@ final class WatchSync: NSObject, WCSessionDelegate {
     func send(_ state: CareState) {
         guard let session, session.activationState == .activated, session.isPaired, session.isWatchAppInstalled,
               let data = try? CarePersistence.encode(WatchPayload.trimmed(state)) else { return }
-        try? session.updateApplicationContext([WatchPayload.stateKey: data])
+        try? session.updateApplicationContext([WatchPayload.stateKey: data, WatchPayload.languageKey: AppLanguage.code])
     }
 
     // MARK: WCSessionDelegate
